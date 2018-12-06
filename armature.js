@@ -1,21 +1,29 @@
 var VERTEX_SHADER = [
+    '#define MaxBone 20',
     ' #ifdef GL_ES',
     'precision highp float;',
+
     '  #endif',
     'attribute vec3 a_Position;',
     'attribute vec3 a_Normal;',
+    'attribute vec3 a_BoneIds;',
+    'attribute vec3 a_Weights;',
 
-   
     'uniform mat4 u_ModelMatrix;',
     'uniform mat4 u_ViewMatrix;',
     'uniform mat4 u_ProjectionMatrix;',
     'uniform mat4 u_NormalMatrix;',
-
+    'uniform mat4 u_Bones[MaxBone];',
+    
     'varying vec3 v_Normal;',
     'varying vec3 v_FragPos;',
     
     'void main(){',
-        'gl_Position = u_ProjectionMatrix * u_ViewMatrix * u_ModelMatrix * vec4(a_Position,1.0);',
+        'mat4 boneMatrix = u_Bones[int(a_BoneIds[0])] * a_Weights[0];',
+        'boneMatrix += (u_Bones[int(a_BoneIds[1])]  * a_Weights[1]);',
+        'boneMatrix += (u_Bones[int(a_BoneIds[2])]  * a_Weights[2]);',
+        'vec4 newVertex = boneMatrix * vec4(a_Position, 1.0);',
+        'gl_Position = u_ProjectionMatrix * u_ViewMatrix * u_ModelMatrix * newVertex;',
         'v_FragPos = (u_ModelMatrix * vec4(a_Position,1.0)).xyz;',
         'vec3 tmp = vec3(a_Normal.x, a_Normal.y, a_Normal.z);',
         'v_Normal =  mat3(u_NormalMatrix) * tmp;',
@@ -37,26 +45,21 @@ var FRAGMENT_SHADER = [
     'varying vec3 v_Normal;',
     'varying vec3 v_FragPos;',
     'void main(){',
-      
         'vec3 norm = normalize(v_Normal);',
-        //ambient
+        //Ambient
         'float ambientStrenght = 0.1;',
         'vec3 ambient = ambientStrenght * u_lightColor;',
-        //diffuse
+        //Diffuse
         'vec3 lightDirection = normalize(u_lightPos-v_FragPos);',
         'float diff = max(dot(lightDirection, norm), 0.0);',
         'vec3 diffuse = u_lightColor * diff;',
-        //specular
+        //Specular
         'float specularStrength = 0.5;',
         'vec3 viewDir = normalize(u_viewPos - v_FragPos);',
         'vec3 reflectDir = reflect(-lightDirection, norm); ',
         'float spec = pow(max(dot(viewDir, reflectDir), 0.0),64.0);',
         'vec3 specular = specularStrength * spec * u_lightColor; ',
-
-        
-        
-        
-    
+        //Mix
         'gl_FragColor = vec4(u_objectColor * (specular + ambient + diffuse ), 1);',
     '}',
 ].join("\n");
@@ -64,12 +67,10 @@ var FRAGMENT_SHADER = [
 var ax = 10;
 var ay = 20;
 
-var kx=2,ky=3,kz=-3;
+var kx=-6,ky=3,kz=-3;//light position
 
 function main(){
-
     var canvas = document.getElementById("mycanvas");
-
     var gl = getWebGLContext(canvas);
 
     if(!gl)
@@ -77,7 +78,6 @@ function main(){
         console.log("Gl Error");
         return;
     }
-        
 
     if(!initShaders(gl, VERTEX_SHADER, FRAGMENT_SHADER))
     {
@@ -85,68 +85,48 @@ function main(){
         return;
     }
 
-    loadJSONResource("models/hiyerdeneme.json").then((mod) => {
+    loadJSONResource("models/human.json").then((mod) => {
+        console.log(mod);
         var model = mod;
-        console.log(model);
         model = new Model(model);
         
-        var shad = new Shader(gl);
-
+        var shad = new Shader(gl);    
+        gl.enable(gl.DEPTH_TEST);
         
-       
+        var Lx=0,Ly=0,Lz=-50; //Camera position
         
+        const loop = () => {
+            gl.clearColor(0.4, 0.4, 0.4, 1.0);
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-      
-    
-	gl.enable(gl.DEPTH_TEST);
-	
-    var Lx=0,Ly=0,Lz=-50;
-   
-    
-    const loop = () => {
-        gl.clearColor(0.4, 0.4, 0.4, 1.0);
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+            shad.gl.uniform3fv(shad.u_lightPos, new Float32Array([kx, ky, kz]));
+            shad.gl.uniform3fv(shad.u_viewPos, new Float32Array([Lx, Ly, Lz]));
 
-        shad.gl.uniform3fv(shad.u_lightPos, new Float32Array([kx, ky, kz]));
-        shad.gl.uniform3fv(shad.u_viewPos, new Float32Array([Lx, Ly, Lz]));
+            var viewMatrix = new Matrix4();
+            viewMatrix.setLookAt(Lx, Ly, Lz, 0, 0, 0, 0, 1, 0);
+            gl.uniformMatrix4fv(shad.u_ViewMatrix, false, viewMatrix.elements);
+            
+            var projectionMatrix = new Matrix4();
+            projectionMatrix.setPerspective(30, canvas.width/canvas.height, 1, 100);
+            gl.uniformMatrix4fv(shad.u_ProjectionMatrix, false, projectionMatrix.elements);
+            
+            var modelMatrix = new Matrix4();
+            modelMatrix.setIdentity();
+            model.drawModel(model.root, shad, modelMatrix);
+            
+            var joint = model.getJointByName(model.root, "SolKol");
+           // var joint2 = model.getJointByName(model.root, "Cone_002");
+            joint.rotateJoint(30, 1, 1, 1);
+            //joint2.rotateJoint(60, 1, 0, 0);
+          
+            //return;
+            /*  //draw light
+            modelMatrix.setIdentity();
+            gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+            initArrayBuffer(new Float32Array([kx, ky, kz]), 'a_Position', 3, 0, 0);
+            gl.drawArrays(gl.POINTS,0 ,1);*/
 
-
-
-        var viewMatrix = new Matrix4();
-        viewMatrix.setLookAt(Lx, Ly, Lz, 0, 0, 0, 0, 1, 0);
-        gl.uniformMatrix4fv(shad.u_ViewMatrix, false, viewMatrix.elements);
-        
-        var projectionMatrix = new Matrix4();
-        projectionMatrix.setPerspective(30, canvas.width/canvas.height, 1, 100);
-        gl.uniformMatrix4fv(shad.u_ProjectionMatrix, false, projectionMatrix.elements);
-        
-        
-      
-
-      
-        
-        
-        var modelMatrix = new Matrix4();
-        
-        modelMatrix.setIdentity();
-        //console.log(model.root);
-       
-        model.drawModel(model.root, shad, modelMatrix);
-        return;
-       // modelMatrix.multiply(trans);
-        //modelMatrix.scale(0.01,0.01,0.01);
-       // drawMesh(mesh, modelMatrix);
-
-        
-        
-
-      /*  //draw light
-        modelMatrix.setIdentity();
-        gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
-        initArrayBuffer(new Float32Array([kx, ky, kz]), 'a_Position', 3, 0, 0);
-        gl.drawArrays(gl.POINTS,0 ,1);*/
-
-        requestAnimationFrame(loop);
+            requestAnimationFrame(loop);
         }  
         requestAnimationFrame(loop);
 
