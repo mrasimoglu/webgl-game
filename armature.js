@@ -1,5 +1,5 @@
 var VERTEX_SHADER = [
-    '#define MaxBone 20',
+    '#define MaxBone 200',
     ' #ifdef GL_ES',
     'precision highp float;',
 
@@ -19,6 +19,7 @@ var VERTEX_SHADER = [
     'varying vec3 v_FragPos;',
     
     'void main(){',
+   // 'vec3 ttt = vec3(a_Position.x, -a_Position.z, a_Position.y);',
         'mat4 boneMatrix = u_Bones[int(a_BoneIds[0])] * a_Weights[0];',
         'boneMatrix += (u_Bones[int(a_BoneIds[1])]  * a_Weights[1]);',
         'boneMatrix += (u_Bones[int(a_BoneIds[2])]  * a_Weights[2]);',
