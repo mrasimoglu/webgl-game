@@ -1,0 +1,758 @@
+{
+	 "rootnode": {
+		 "name": "RootNode"
+		,"transformation": [
+			 1
+			,0
+			,0
+			,0
+			,0
+			,1
+			,0
+			,0
+			,0
+			,0
+			,1
+			,0
+			,0
+			,0
+			,0
+			,1
+		]
+		,"children": [
+			{
+				 "name": "Cube"
+				,"transformation": [
+					 100
+					,0
+					,0
+					,0
+					,0
+					,-1.62921e-005
+					,100
+					,0
+					,0
+					,-100
+					,-1.62921e-005
+					,0
+					,0
+					,0
+					,0
+					,1
+				]
+				,"meshes": [
+					 0
+					,1
+					,2
+				]
+			}
+			,{
+				 "name": "Plane"
+				,"transformation": [
+					 800
+					,0
+					,0
+					,0
+					,0
+					,-0.000130337
+					,800
+					,0
+					,0
+					,-800
+					,-0.000130337
+					,0
+					,0
+					,0
+					,0
+					,1
+				]
+				,"meshes": [
+					 3
+				]
+			}
+			,{
+				 "name": "Hemi"
+				,"transformation": [
+					 100
+					,0
+					,0
+					,0
+					,0
+					,100
+					,0
+					,0
+					,0
+					,0
+					,100
+					,0
+					,0
+					,0
+					,0
+					,1
+				]
+			}
+		]
+	}
+	,"flags": 8
+	,"meshes": [
+		{
+			 "name": "Cube.001"
+			,"materialindex": 0
+			,"primitivetypes": 4
+			,"vertices": [
+				 -1
+				,-1
+				,0
+				,-1
+				,-1
+				,2
+				,-1
+				,-0.232462
+				,2
+				,-1
+				,1
+				,0
+				,1
+				,-1
+				,0
+				,1
+				,-1
+				,2
+				,-1
+				,-1
+				,2
+				,-1
+				,-1
+				,0
+				,-1
+				,1
+				,0
+				,1
+				,1
+				,0
+				,1
+				,-1
+				,0
+				,-1
+				,-1
+				,0
+				,1
+				,0.267538
+				,2
+				,-1
+				,-0.232462
+				,2
+				,-1
+				,-1
+				,2
+				,1
+				,-1
+				,2
+			]
+			,"normals": [
+				 -1
+				,0
+				,0
+				,-1
+				,0
+				,0
+				,-1
+				,0
+				,0
+				,-1
+				,0
+				,0
+				,0
+				,-1
+				,0
+				,0
+				,-1
+				,0
+				,0
+				,-1
+				,0
+				,0
+				,-1
+				,0
+				,0
+				,0
+				,-1
+				,0
+				,0
+				,-1
+				,0
+				,0
+				,-1
+				,0
+				,0
+				,-1
+				,0
+				,0
+				,1
+				,0
+				,0
+				,1
+				,0
+				,0
+				,1
+				,0
+				,0
+				,1
+			]
+			,"faces": [
+				[
+					 0
+					,1
+					,2
+				]
+				,[
+					 0
+					,2
+					,3
+				]
+				,[
+					 4
+					,5
+					,6
+				]
+				,[
+					 4
+					,6
+					,7
+				]
+				,[
+					 8
+					,9
+					,10
+				]
+				,[
+					 8
+					,10
+					,11
+				]
+				,[
+					 12
+					,13
+					,14
+				]
+				,[
+					 12
+					,14
+					,15
+				]
+			]
+		}
+		,{
+			 "name": "Cube.001"
+			,"materialindex": 1
+			,"primitivetypes": 4
+			,"vertices": [
+				 -1
+				,1
+				,0
+				,-1
+				,-0.232462
+				,2
+				,1
+				,0.267538
+				,2
+				,1
+				,1
+				,0
+			]
+			,"normals": [
+				 -0.111495
+				,0.891957
+				,0.438157
+				,-0.111495
+				,0.891957
+				,0.438157
+				,-0.111495
+				,0.891957
+				,0.438157
+				,-0.111495
+				,0.891957
+				,0.438157
+			]
+			,"faces": [
+				[
+					 0
+					,1
+					,2
+				]
+				,[
+					 0
+					,2
+					,3
+				]
+			]
+		}
+		,{
+			 "name": "Cube.001"
+			,"materialindex": 2
+			,"primitivetypes": 4
+			,"vertices": [
+				 1
+				,1
+				,0
+				,1
+				,0.267538
+				,2
+				,1
+				,-1
+				,2
+				,1
+				,-1
+				,0
+			]
+			,"normals": [
+				 1
+				,0
+				,0
+				,1
+				,0
+				,0
+				,1
+				,0
+				,0
+				,1
+				,0
+				,0
+			]
+			,"faces": [
+				[
+					 0
+					,1
+					,2
+				]
+				,[
+					 0
+					,2
+					,3
+				]
+			]
+		}
+		,{
+			 "name": "Plane"
+			,"materialindex": 3
+			,"primitivetypes": 4
+			,"vertices": [
+				 -1
+				,-1
+				,0
+				,1
+				,-1
+				,0
+				,1
+				,1
+				,0
+				,-1
+				,1
+				,0
+			]
+			,"normals": [
+				 0
+				,0
+				,1
+				,0
+				,0
+				,1
+				,0
+				,0
+				,1
+				,0
+				,0
+				,1
+			]
+			,"tangents": [
+				 1
+				,0
+				,0
+				,1
+				,0
+				,0
+				,1
+				,0
+				,0
+				,1
+				,0
+				,0
+			]
+			,"bitangents": [
+				 -7.94888e-008
+				,-1
+				,0
+				,0
+				,-1
+				,0
+				,-7.94888e-008
+				,-1
+				,0
+				,-7.94888e-008
+				,-1
+				,0
+			]
+			,"numuvcomponents": [
+				 2
+			]
+			,"texturecoords": [
+				[
+					 -5.4988
+					,-5.4988
+					,6.4988
+					,-5.4988
+					,6.4988
+					,6.4988
+					,-5.4988
+					,6.4988
+				]
+			]
+			,"faces": [
+				[
+					 0
+					,1
+					,2
+				]
+				,[
+					 0
+					,2
+					,3
+				]
+			]
+		}
+	]
+	,"materials": [
+		{
+			 "properties": [
+				{
+					 "key": "?mat.name"
+					,"semantic": 0
+					,"index": 0
+					,"type": 3
+					,"value": "Material.002"
+				}
+				,{
+					 "key": "$clr.diffuse"
+					,"semantic": 0
+					,"index": 0
+					,"type": 1
+					,"value": [
+						 0.64
+						,0
+						,0.153792
+					]
+				}
+				,{
+					 "key": "$clr.emissive"
+					,"semantic": 0
+					,"index": 0
+					,"type": 1
+					,"value": [
+						 0
+						,0
+						,0
+					]
+				}
+				,{
+					 "key": "$clr.ambient"
+					,"semantic": 0
+					,"index": 0
+					,"type": 1
+					,"value": [
+						 0
+						,0
+						,0
+					]
+				}
+				,{
+					 "key": "$clr.specular"
+					,"semantic": 0
+					,"index": 0
+					,"type": 1
+					,"value": [
+						 0.25
+						,0.25
+						,0.25
+					]
+				}
+				,{
+					 "key": "$mat.shinpercent"
+					,"semantic": 0
+					,"index": 0
+					,"type": 1
+					,"value": 9.60784
+				}
+				,{
+					 "key": "$mat.shininess"
+					,"semantic": 0
+					,"index": 0
+					,"type": 1
+					,"value": 9.60784
+				}
+			]
+		}
+		,{
+			 "properties": [
+				{
+					 "key": "?mat.name"
+					,"semantic": 0
+					,"index": 0
+					,"type": 3
+					,"value": "Material.003"
+				}
+				,{
+					 "key": "$clr.diffuse"
+					,"semantic": 0
+					,"index": 0
+					,"type": 1
+					,"value": [
+						 0.64
+						,0.626109
+						,0
+					]
+				}
+				,{
+					 "key": "$clr.emissive"
+					,"semantic": 0
+					,"index": 0
+					,"type": 1
+					,"value": [
+						 0
+						,0
+						,0
+					]
+				}
+				,{
+					 "key": "$clr.ambient"
+					,"semantic": 0
+					,"index": 0
+					,"type": 1
+					,"value": [
+						 0
+						,0
+						,0
+					]
+				}
+				,{
+					 "key": "$clr.specular"
+					,"semantic": 0
+					,"index": 0
+					,"type": 1
+					,"value": [
+						 0.25
+						,0.25
+						,0.25
+					]
+				}
+				,{
+					 "key": "$mat.shinpercent"
+					,"semantic": 0
+					,"index": 0
+					,"type": 1
+					,"value": 9.60784
+				}
+				,{
+					 "key": "$mat.shininess"
+					,"semantic": 0
+					,"index": 0
+					,"type": 1
+					,"value": 9.60784
+				}
+			]
+		}
+		,{
+			 "properties": [
+				{
+					 "key": "?mat.name"
+					,"semantic": 0
+					,"index": 0
+					,"type": 3
+					,"value": "Material.004"
+				}
+				,{
+					 "key": "$clr.diffuse"
+					,"semantic": 0
+					,"index": 0
+					,"type": 1
+					,"value": [
+						 0.000945777
+						,0
+						,0.64
+					]
+				}
+				,{
+					 "key": "$clr.emissive"
+					,"semantic": 0
+					,"index": 0
+					,"type": 1
+					,"value": [
+						 0.00118222
+						,0
+						,0.8
+					]
+				}
+				,{
+					 "key": "$clr.ambient"
+					,"semantic": 0
+					,"index": 0
+					,"type": 1
+					,"value": [
+						 0
+						,0
+						,0
+					]
+				}
+				,{
+					 "key": "$clr.specular"
+					,"semantic": 0
+					,"index": 0
+					,"type": 1
+					,"value": [
+						 0.25
+						,0.25
+						,0.25
+					]
+				}
+				,{
+					 "key": "$mat.shinpercent"
+					,"semantic": 0
+					,"index": 0
+					,"type": 1
+					,"value": 9.60784
+				}
+				,{
+					 "key": "$mat.shininess"
+					,"semantic": 0
+					,"index": 0
+					,"type": 1
+					,"value": 9.60784
+				}
+			]
+		}
+		,{
+			 "properties": [
+				{
+					 "key": "?mat.name"
+					,"semantic": 0
+					,"index": 0
+					,"type": 3
+					,"value": "Material.001"
+				}
+				,{
+					 "key": "$clr.diffuse"
+					,"semantic": 0
+					,"index": 0
+					,"type": 1
+					,"value": [
+						 0.64
+						,0.64
+						,0.64
+					]
+				}
+				,{
+					 "key": "$clr.emissive"
+					,"semantic": 0
+					,"index": 0
+					,"type": 1
+					,"value": [
+						 0
+						,0
+						,0
+					]
+				}
+				,{
+					 "key": "$clr.ambient"
+					,"semantic": 0
+					,"index": 0
+					,"type": 1
+					,"value": [
+						 0
+						,0
+						,0
+					]
+				}
+				,{
+					 "key": "$clr.specular"
+					,"semantic": 0
+					,"index": 0
+					,"type": 1
+					,"value": [
+						 0
+						,0
+						,0
+					]
+				}
+				,{
+					 "key": "$mat.shinpercent"
+					,"semantic": 0
+					,"index": 0
+					,"type": 1
+					,"value": 9.60784
+				}
+				,{
+					 "key": "$mat.shininess"
+					,"semantic": 0
+					,"index": 0
+					,"type": 1
+					,"value": 9.60784
+				}
+				,{
+					 "key": "$tex.file"
+					,"semantic": 1
+					,"index": 0
+					,"type": 3
+					,"value": "C:\\Users\\mrasimoglu\\Desktop\\webgl-test-master\\webgl-test-master\\textures\\terrain.jpg"
+				}
+				,{
+					 "key": "$tex.uvtrafo"
+					,"semantic": 1
+					,"index": 0
+					,"type": 1
+					,"value": [
+						 0
+						,0
+						,1
+						,1
+						,0
+					]
+				}
+				,{
+					 "key": "$tex.uvwsrc"
+					,"semantic": 1
+					,"index": 0
+					,"type": 4
+					,"value": 0
+				}
+			]
+		}
+	]
+	,"lights": [
+		{
+			 "name": "Hemi"
+			,"type": 1
+			,"attenuationconstant": 1
+			,"attenuationlinear": 1
+			,"attenuationquadratic": 0
+			,"diffusecolor": [
+				 100
+				,100
+				,100
+			]
+			,"specularcolor": [
+				 100
+				,100
+				,100
+			]
+			,"ambientcolor": [
+				 0
+				,0
+				,0
+			]
+			,"direction": [
+				 0
+				,0
+				,0
+			]
+		}
+	]
+}
