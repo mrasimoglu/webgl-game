@@ -1,7 +1,7 @@
 class Model {
     constructor(ModelFromJson, Shader) {
         this.meshes = [];
-        
+        this.Shader = Shader;
         this.materials = [];
         ModelFromJson.materials.forEach((mat) => {
             this.materials.push(new Material(mat, Shader));
@@ -12,7 +12,6 @@ class Model {
         });
 
         this.m_GlobalInverseTransform = glMatrix.mat4.fromValues(...ModelFromJson.rootnode.transformation);
-        glMatrix.mat4.rotateX(this.m_GlobalInverseTransform, this.m_GlobalInverseTransform, glMatrix.glMatrix.toRadian(90));
         glMatrix.mat4.invert(this.m_GlobalInverseTransform, this.m_GlobalInverseTransform);
 
 
@@ -26,25 +25,40 @@ class Model {
         }
       
         this.animator = new Animator(this.animations, this);
-        
-        console.log(this);
+    }
+
+    copy()
+    {
+        var newone = Object.create(Model.prototype);
+        newone.Shader = this.Shader;
+        newone.materials = this.materials;
+        newone.animations = this.animations;
+        newone.root = this.root;
+        newone.m_GlobalInverseTransform = this.m_GlobalInverseTransform;
+        newone.animator = new Animator(this.animations, newone);
+        newone.meshes = [];
+        this.meshes.forEach(mesh => {
+            newone.meshes.push(mesh.copy());
+        });
+        return newone;
+
     }
 
     loopinside(root, globaltranformation)
     {
-
+        //glMatrix.mat4.mul(globaltranformation, globaltranformation, root.transformation);
         if (root.meshes == undefined)
             var tmp = new Joint(root.name, root.transformation);
         else
         {
             var tmp = new Joint(root.name, root.transformation, root.meshes);
-            root.meshes.forEach((mesh) =>{
-                var ma = glMatrix.mat4.clone(tmp.transformation);
+        /*    root.meshes.forEach((mesh) =>{
+                var ma = glMatrix.mat4.clone(globaltranformation);
                 glMatrix.mat4.transpose(ma, ma);
                 this.meshes[mesh].transformation = glMatrix.mat4.clone(ma);
-            });
+            });*/
         }
-       
+
         if(root.children != undefined)
         {
             root.children.forEach((child) => {
@@ -55,15 +69,31 @@ class Model {
         return tmp;
     }
 
-    drawModel(Shader, ModelMatrix)
+    drawModel(ModelMatrix)
     {
-
-        this.meshes.forEach((mesh)=>{
+        glMatrix.mat4.transpose(ModelMatrix, ModelMatrix);
+        this.drawModell(this.root, glMatrix.mat4.clone(ModelMatrix));
+       
+       /* this.meshes.forEach((mesh)=>{
             var ma = glMatrix.mat4.create();
-            glMatrix.mat4.mul(ma, ModelMatrix.elements, this.root.transformation);
-            glMatrix.mat4.mul(ma, ma, mesh.transformation);
-         
-            mesh.drawMesh(Shader, ma);
+            glMatrix.mat4.mul(ma, mesh.transformation, this.root.transformation);
+            glMatrix.mat4.mul(ma, ModelMatrix, ma);
+            mesh.drawMesh(this.Shader, ma);
+        });*/
+    }
+
+    drawModell(root,parenttrans)
+    {
+        glMatrix.mat4.mul(parenttrans,root.transformation, parenttrans);
+        root.mesh.forEach((mesh)=>{
+            var ma = glMatrix.mat4.clone(parenttrans);
+            glMatrix.mat4.transpose(ma, ma);
+            this.meshes[mesh].drawMesh(this.Shader, glMatrix.mat4.clone(ma));
+        });
+
+
+        root.childs.forEach((child)=>{
+            this.drawModell(child, glMatrix.mat4.clone(parenttrans));
         });
     }
 
@@ -148,7 +178,6 @@ class Bone {
         this.offsetmatrix = glMatrix.mat4.fromValues(...offsetmatrixfromjson);
         glMatrix.mat4.transpose(this.offsetmatrix, this.offsetmatrix);
         this.finaltransformation = glMatrix.mat4.create();
-        glMatrix.mat4.rotateX(this.finaltransformation, this.finaltransformation, glMatrix.glMatrix.toRadian(-90));
     }
 
     calcFinaltransformation(m_GlobalInverseTransform, GlobalTransformation)
@@ -159,38 +188,57 @@ class Bone {
         
     }
 }
-
-var BoneArrayClass =
-   function() {
+class BoneArrayClass
+{
+    constructor()
+    {
         this.bones = [];
         this.bonesnames = new Object();
-        this.push = (bone) => {this.bones.push(bone); this.bonesnames[bone.name] = this.bones[this.bones.length-1]};
-        this.getBoneByID = (id) => {return this.bones[id]};
-        this.getBoneByName = (name) => { return this.bonesnames[name]};
-        this.getBonesFinalFlat = () => {return this.bones.reduce((x,y) => x.concat(y.finaltransformation.reduce((a,b) => a.concat(b),[])), [])};
-        this.getLength = () =>{return this.bones.length};
-    };
+    }
 
-class Mesh {
-    constructor(MeshFromJson, material) {
-        
+    push(bone)
+    {
+        this.bones.push(bone); 
+        this.bonesnames[bone.name] = this.bones[this.bones.length-1];
+    }
+    getBoneByID(id)
+    {
+        return this.bones[id];
+    } 
+    getBoneByName(name)
+    {
+        return this.bonesnames[name];
+    }
+    getBonesFinalFlat()
+    {
+        return this.bones.reduce((x,y) => x.concat(y.finaltransformation.reduce((a,b) => a.concat(b),[])), []);
+    }
+    getLength()
+    {
+        return this.bones.length;
+    }
+    copy()
+    {
+        var newone = Object.create(BoneArrayClass.prototype);
+        newone.bones = Array.from(this.bones);;
+        newone.bonesnames = this.bonesnames;
+        return newone;
+    }
+}
 
 
-        this.name = MeshFromJson.name;
-        
+
+class StaticMesh {
+    constructor(MeshFromJson, material)
+    {
         this.vertices = Float32Array.from(MeshFromJson.vertices);
         this.indices = Uint16Array.from([].concat.apply([], MeshFromJson.faces));
         this.normals = Float32Array.from(MeshFromJson.normals);
         this.texcoords = (MeshFromJson.texturecoords != undefined) ? Float32Array.from(MeshFromJson.texturecoords[0]) : null;
-
-        this.bones = new BoneArrayClass(); 
-        this.material = material;
-        this.boneswithnames = new Object();
-        this.WeightInfo = [];
         this.BoneIds = [];
         this.Weights = [];
-
-        this.finaltransformation = glMatrix.mat4.create();
+        this.material = material;
+        this.WeightInfo = [];
         if (MeshFromJson.bones != undefined)
         {
             for(var i = 0; i<this.vertices.length / 3; i++)
@@ -199,12 +247,6 @@ class Mesh {
             }
 
             MeshFromJson.bones.forEach((bone, boneid) => {
-                var b  = new Bone(bone.name, bone.offsetmatrix);
-           
-                
-                this.bones.push(b);
-                //this.boneswithnames[bone.name] = this.bones[boneid];
-
                 bone.weights.forEach((aweight) => {
                 this.pushWeight(boneid, aweight);
                 });
@@ -213,9 +255,8 @@ class Mesh {
             this.sortWeights();
             this.clearWeights();
         }
-      
     }
-  
+
     pushWeight(boneid, aweight) {
         var vert = aweight[0];
         var impact = aweight[1];
@@ -260,7 +301,36 @@ class Mesh {
         this.Weights = Float32Array.from(this.Weights);
         
     }
+}
 
+class Mesh {
+    constructor(MeshFromJson, material) 
+    {
+        this.name = MeshFromJson.name;
+        this.bones = new BoneArrayClass(); 
+        this.transformation;
+        this.staticMesh = new StaticMesh(MeshFromJson, material);
+        if (MeshFromJson.bones != undefined)
+        {
+            MeshFromJson.bones.forEach((bone) => {
+                this.bones.push(new Bone(bone.name, bone.offsetmatrix));
+            });
+        }
+        
+
+        this.finaltransformation = glMatrix.mat4.create();
+    }
+    copy()
+    {
+        var newone = Object.create(Mesh.prototype);
+        newone.name = this.name;
+        newone.staticMesh = this.staticMesh;
+       // newone.transformation = glMatrix.mat4.clone(this.transformation);
+        newone.finaltransformation = glMatrix.mat4.clone(this.finaltransformation);
+        newone.name = this.name;
+        newone.bones = this.bones.copy();
+        return newone;
+    }
     drawMesh(Shader, ModelMatrix)
     {   
     
@@ -269,8 +339,8 @@ class Mesh {
         {
             var flatBones = this.bones.getBonesFinalFlat();
             Shader.gl.uniformMatrix4fv(Shader.u_Bones, false, Float32Array.from(flatBones));
-            Shader.initArrayBuffer(this.BoneIds, 'a_BoneIds', 3, 0, 0);
-            Shader.initArrayBuffer(this.Weights, 'a_Weights', 3, 0, 0);
+            Shader.initArrayBuffer(this.staticMesh.BoneIds, 'a_BoneIds', 3, 0, 0);
+            Shader.initArrayBuffer(this.staticMesh.Weights, 'a_Weights', 3, 0, 0);
             Shader.gl.uniform1f(Shader.u_HasBones, true);
             
         }
@@ -280,31 +350,31 @@ class Mesh {
         }
 
 
-        if(this.material.diffusemaps.length > 0)
+        if(this.staticMesh.material.diffusemaps.length > 0)
         {
-            Shader.gl.bindTexture(Shader.gl.TEXTURE_2D, this.material.diffusemaps[0]);
+            Shader.gl.bindTexture(Shader.gl.TEXTURE_2D, this.staticMesh.material.diffusemaps[0]);
             Shader.gl.activeTexture(Shader.gl.TEXTURE0);
         }
      
         
-        if(this.texcoords)
+        if(this.staticMesh.texcoords)
         {
             Shader.gl.uniform1f(Shader.u_HasTex, 0.9);
-            Shader.initArrayBuffer(this.texcoords, 'a_TexCoords', 2, 0, 0);
+            Shader.initArrayBuffer(this.staticMesh.texcoords, 'a_TexCoords', 2, 0, 0);
         }
         else
         {
             Shader.disableVertexAttribArray('a_TexCoords');
             Shader.gl.uniform1f(Shader.u_HasTex, 0.1);
             //console.log("yok" + this.name + this.material.diffuse + this.material.ambient);
-            Shader.gl.uniform3fv(Shader.u_diffuse, this.material.diffuse);
-            Shader.gl.uniform3fv(Shader.u_ambient, this.material.ambient);
+            Shader.gl.uniform3fv(Shader.u_diffuse, this.staticMesh.material.diffuse);
+            Shader.gl.uniform3fv(Shader.u_ambient, this.staticMesh.material.ambient);
         }
             
-        if(this.material.specular)
+        if(this.staticMesh.material.specular)
         {
-            Shader.gl.uniform1f(Shader.u_shiness, this.material.shiness);
-            Shader.gl.uniform3fv(Shader.u_specular, this.material.specular);
+            Shader.gl.uniform1f(Shader.u_shiness, this.staticMesh.material.shiness);
+            Shader.gl.uniform3fv(Shader.u_specular, this.staticMesh.material.specular);
             Shader.gl.uniform1f(Shader.u_HasSpecular, true);
         }
         else
@@ -315,8 +385,8 @@ class Mesh {
 
         Shader.gl.uniformMatrix4fv(Shader.u_ModelMatrix, false, ModelMatrix);
         
-        Shader.initArrayBuffer(this.vertices, 'a_Position', 3, 0, 0);
-        Shader.initArrayBuffer(this.normals, 'a_Normal', 3, 0, 0);
+        Shader.initArrayBuffer(this.staticMesh.vertices, 'a_Position', 3, 0, 0);
+        Shader.initArrayBuffer(this.staticMesh.normals, 'a_Normal', 3, 0, 0);
        
         glMatrix.mat4.invert(ModelMatrix, ModelMatrix);
         glMatrix.mat4.transpose(ModelMatrix, ModelMatrix);
@@ -325,10 +395,10 @@ class Mesh {
         //ÜÇGENLERİN BAĞLANTILARINI AKTARIYORUZ.
 
         Shader.gl.bindBuffer(Shader.gl.ELEMENT_ARRAY_BUFFER, Shader.IndicesBuffer);
-        Shader.gl.bufferData(Shader.gl.ELEMENT_ARRAY_BUFFER, this.indices, Shader.gl.STATIC_DRAW);
+        Shader.gl.bufferData(Shader.gl.ELEMENT_ARRAY_BUFFER, this.staticMesh.indices, Shader.gl.STATIC_DRAW);
         //ÜÇGENLERİN BAĞLANTILARINI AKTARIYORUZ.
 
         
-        Shader.gl.drawElements(Shader.gl.TRIANGLES, this.indices.length, Shader.gl.UNSIGNED_SHORT, 0);
+        Shader.gl.drawElements(Shader.gl.TRIANGLES, this.staticMesh.indices.length, Shader.gl.UNSIGNED_SHORT, 0);
     }
 }

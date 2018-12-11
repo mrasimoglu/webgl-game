@@ -25,7 +25,7 @@ class Animator {
 
     loopinside(root, ParentTransform, m_GlobalInverseTransform, ATime)
     {
-        var NodeTransformation = glMatrix.mat4.clone(root.transformation);
+        var NodeTransformation = glMatrix.mat4.create();
        
         var currentAnimChannel = this.currentAnimation.channels.getChannelbyName(root.name);
         
@@ -54,6 +54,9 @@ class Animator {
     
         bones.forEach((bone)=>{
             bone.calcFinaltransformation(m_GlobalInverseTransform, glMatrix.mat4.clone(GlobalTransformation));
+        });
+        root.mesh.forEach(m => {
+            this.Model.meshes[m].transformation = glMatrix.mat4.clone(GlobalTransformation);
         });
    
 

@@ -1,7 +1,7 @@
 var ax = 10, ay = 20;
 var kx = -60, ky = 2, kz = -300;//light position
 var s = 1;
-
+var isPlay = false;
 var Init = function() 
 {
     loadTextResource('shaders/shader.vs.glsl').catch((err)=>{
@@ -12,25 +12,32 @@ var Init = function()
     		alert('Fatal error getting fragment shader (see console)');
             console.error(fsErr);
     	}).then((fsText)=>{
-			var modelTexts = ["models/town.json"];
+			var buildingPaths = ["models/buildings/nationalBank.json"];
+            var enemiesPaths = ["models/characters/enemy1.json"];
 
 			var promises = [];
-			modelTexts.forEach(function(element)
+			buildingPaths.forEach(function(element)
 			{
                 promises.push(loadJSONResource(element));
 			});
 			
 			Promise.all(promises).then((res) => {
-                modelObjects = res;
-                console.log(modelObjects);
+                var promises2 = [];
+                enemiesPaths.forEach(function(element)
+                {
+                    promises2.push(loadJSONResource(element));
+                });
                 
-                Run(modelObjects, vsText, fsText);
+                Promise.all(promises2).then((res2) => {
+                    Run(res, res2, vsText, fsText);
+                });
+                
 			});
 		});		
 	}); 
 }
 
-function Run(JSONModels, VertexShader, FragmentShader){
+function Run(buildingJSONs, enemiesJSONs, VertexShader, FragmentShader){
     var canvas = document.getElementById("mycanvas");
     var gl = getWebGLContext(canvas);
     console.log(gl);
@@ -53,16 +60,21 @@ function Run(JSONModels, VertexShader, FragmentShader){
         ['u_HasSpecular', 'u_HasTex', 'u_ambient', 'u_diffuse','u_shiness', 'u_specular', 'u_HasBones','u_ModelMatrix', 
         'u_ViewMatrix', 'u_ProjectionMatrix', 'u_NormalMatrix', 'u_Bones', 'u_lightColor', 'u_lightPos', 'u_viewPos']);    
     
-    var models = [];
-    JSONModels.forEach((model) => {
-        models.push(new Model(model, shad));
-    });
-    models.forEach((model)=>{
-        model.animator.playAnimation(1);
-    });
+    console.log(buildingJSONs);
+    var buildingModels = [];
+    buildingJSONs.forEach((model) => {
+        buildingModels.push(new Model(model, shad));
+    }); 
+
+    var enemyModels = [];
+    enemiesJSONs.forEach((model) => {
+        enemyModels.push(new Model(model, shad));
+    }); 
     
     var Lx=0,Ly=100,Lz=-1000; //Camera position
     var before = Date.now(); var now = Date.now(); //for FPS calculation
+
+   var game = new Game(buildingModels, enemyModels);
     
     const loop = () => {
         gl.clearColor(0.4, 0.4, 0.4, 1.0);
@@ -79,11 +91,13 @@ function Run(JSONModels, VertexShader, FragmentShader){
         projectionMatrix.setPerspective(30, canvas.width/canvas.height, 1, 10000);
         gl.uniformMatrix4fv(shad.u_ProjectionMatrix, false, projectionMatrix.elements);
         
-        models.forEach((model)=>{
-           // model.callAnimator();
-            var modelMatrix = new Matrix4();
-            modelMatrix.setIdentity();
-            modelMatrix.scale(s, s, s);
+     
+        game.render();
+
+        /*buildingModels.forEach((model)=>{
+
+            
+            
             model.drawModel(shad, modelMatrix);
         });
         

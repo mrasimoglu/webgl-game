@@ -33,3 +33,19 @@ var loadJSONResource = (url) => {
         }); 
     });
 };
+
+ var getModels = async (textArray) => {
+    
+        var promises = [];
+        textArray.forEach(function(element)
+        {
+            promises.push(loadJSONResource(element));
+        });
+        var val;
+        console.log("bekliyor");
+        await Promise.all(promises).then((res) => {
+        val=res;
+        });
+        console.log(val);
+        return val; 
+};
