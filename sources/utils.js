@@ -13,6 +13,11 @@ var loadTextResource = function(url)
     request.send();
     } );
 };
+var loadTextResourceWait = async function(url)
+{
+    return await loadTextResource(url);
+};
+
 
 var loadImage = function (url) {
     return new Promise((resolve, reject) => { 
@@ -42,10 +47,10 @@ var loadJSONResource = (url) => {
             promises.push(loadJSONResource(element));
         });
         var val;
-        console.log("bekliyor");
+        
         await Promise.all(promises).then((res) => {
         val=res;
         });
-        console.log(val);
+   
         return val; 
 };

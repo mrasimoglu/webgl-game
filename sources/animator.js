@@ -1,7 +1,7 @@
 class Animator {
     constructor (animations, model)
     {
-        this.currentAnimation = -1;
+        this.currentAnimation = animations[0];
         
         this.animationStartTime = 0;
         this.animations = animations;
@@ -25,12 +25,13 @@ class Animator {
 
     loopinside(root, ParentTransform, m_GlobalInverseTransform, ATime)
     {
-        var NodeTransformation = glMatrix.mat4.create();
+        var NodeTransformation = glMatrix.mat4.clone(root.transformation);
        
         var currentAnimChannel = this.currentAnimation.channels.getChannelbyName(root.name);
         
         if(currentAnimChannel != undefined)
         {
+            
             var RotationMatrix = glMatrix.mat4.create();
             var rquat = this.CalcInterpolatedRotation(currentAnimChannel.getRKey(ATime),currentAnimChannel.rotationkeys, ATime);
             glMatrix.mat4.fromQuat(RotationMatrix, rquat);
@@ -45,21 +46,39 @@ class Animator {
             
             glMatrix.mat4.mul(NodeTransformation, TransformationMatrix, RotationMatrix);
             glMatrix.mat4.mul(NodeTransformation, NodeTransformation, ScalingMatrix);
+           
         }
 
         var GlobalTransformation = glMatrix.mat4.create();
-        glMatrix.mat4.mul(GlobalTransformation, ParentTransform, NodeTransformation);
+        glMatrix.mat4.mul(GlobalTransformation,ParentTransform,NodeTransformation);
        
-        var bones= this.Model.getBoneByName(root.name);
-    
-        bones.forEach((bone)=>{
-            bone.calcFinaltransformation(m_GlobalInverseTransform, glMatrix.mat4.clone(GlobalTransformation));
-        });
-        root.mesh.forEach(m => {
-            this.Model.meshes[m].transformation = glMatrix.mat4.clone(GlobalTransformation);
-        });
-   
+        var bones = this.Model.getBoneByName(root.name);
+        
+        if(bones.length > 0)
+        {   
+            var mmm  = glMatrix.mat4.create();
+            glMatrix.mat4.transpose(mmm, GlobalTransformation);
+           
+            bones.forEach((bone)=>{
+                bone.calcFinaltransformation(m_GlobalInverseTransform, glMatrix.mat4.clone(GlobalTransformation));
+            });
+        }
+       
+            root.mesh.forEach(m => {
+                // console.log(root.name  + "animat");
+                 var mmm  = glMatrix.mat4.create();
+                 glMatrix.mat4.transpose(mmm, GlobalTransformation);
+                 this.Model.meshes[m].transformation.push(glMatrix.mat4.clone(mmm));
+               //  console.log(GlobalTransformation);
+             });
+        
+        
+        
 
+        
+        
+       
+   
         root.childs.forEach((child) => {
             this.loopinside(child, glMatrix.mat4.clone(GlobalTransformation),m_GlobalInverseTransform, ATime);
         });  

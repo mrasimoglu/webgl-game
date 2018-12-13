@@ -2,42 +2,34 @@ var ax = 10, ay = 20;
 var kx = -60, ky = 2, kz = -300;//light position
 var s = 1;
 var isPlay = false;
-var Init = function() 
+var Init = async function() 
 {
-    loadTextResource('shaders/shader.vs.glsl').catch((err)=>{
-		alert('Fatal error getting vertex shader (see console)');
-		console.error(vsErr);
-    }).then((vsText)=>{
-    	loadTextResource('shaders/shader.fs.glsl').catch((err)=> {
-    		alert('Fatal error getting fragment shader (see console)');
-            console.error(fsErr);
-    	}).then((fsText)=>{
-			var buildingPaths = ["models/buildings/nationalBank.json"];
-            var enemiesPaths = ["models/characters/enemy1.json"];
 
-			var promises = [];
-			buildingPaths.forEach(function(element)
-			{
-                promises.push(loadJSONResource(element));
-			});
-			
-			Promise.all(promises).then((res) => {
-                var promises2 = [];
-                enemiesPaths.forEach(function(element)
-                {
-                    promises2.push(loadJSONResource(element));
-                });
-                
-                Promise.all(promises2).then((res2) => {
-                    Run(res, res2, vsText, fsText);
-                });
-                
-			});
-		});		
-	}); 
+    var vsText = await loadTextResourceWait("shaders/shader.vs.glsl");
+    var fsText = await loadTextResourceWait("shaders/shader.fs.glsl");
+
+    var buildingPaths = ["models/buildings/nationalBank.json", "models/buildings/hotelBlackSmith.json", "models/buildings/blackSmith.json",
+     "models/buildings/barn.json", "models/buildings/church.json"];
+    var enemiesPaths = ["models/characters/enemy1.json"];
+    var terrainPath= ["models/terrain.json"];
+   
+
+
+    var buildingJSON = await getModels(buildingPaths);
+    var enemiesJSONs = await getModels(enemiesPaths);
+    var terrainJSON = await getModels(terrainPath);
+
+    var generalJSONs = {"terrain": terrainJSON[0]};
+
+    Run(buildingJSON, enemiesJSONs, generalJSONs, vsText, fsText);
+
+
+    
 }
 
-function Run(buildingJSONs, enemiesJSONs, VertexShader, FragmentShader){
+function Run(buildingJSONs, enemiesJSONs, generalJSONs, VertexShader, FragmentShader){
+
+ 
     var canvas = document.getElementById("mycanvas");
     var gl = getWebGLContext(canvas);
     console.log(gl);
@@ -69,12 +61,18 @@ function Run(buildingJSONs, enemiesJSONs, VertexShader, FragmentShader){
     var enemyModels = [];
     enemiesJSONs.forEach((model) => {
         enemyModels.push(new Model(model, shad));
-    }); 
+    });
+
+    var generalModels = new Object();
+    for (var k in generalJSONs){
+        generalModels[k] = new Model(generalJSONs[k], shad);
+    }
+
     
-    var Lx=0,Ly=100,Lz=-1000; //Camera position
+    var Lx=0,Ly=1500,Lz=-1000; //Camera position
     var before = Date.now(); var now = Date.now(); //for FPS calculation
 
-   var game = new Game(buildingModels, enemyModels);
+   var game = new Game(buildingModels, enemyModels, generalModels);
     
     const loop = () => {
         gl.clearColor(0.4, 0.4, 0.4, 1.0);
@@ -106,13 +104,13 @@ function Run(buildingJSONs, enemiesJSONs, VertexShader, FragmentShader){
         initArrayBuffer(new Float32Array([kx, ky, kz]), 'a_Position', 3, 0, 0);
         gl.drawArrays(gl.POINTS,0 ,1);*/
 
-        now = Date.now();
+        /*now = Date.now();
         var DeltaTime = now - before;
         before = now;
         var fps = parseInt(1000/DeltaTime);
         hud.clearRect(0,0,400,400);
         hud.font = "30px Arial";
-        hud.fillText(fps, 50 ,30);
+        hud.fillText(fps, 50 ,30);*/
     
         requestAnimationFrame(loop);
     }
