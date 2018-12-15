@@ -27,7 +27,7 @@ class CubeMap
     }
 }
 
-class SkyBox
+class Skybox
 {
     constructor(Shader, textures, SkyboxJSON)
     {
