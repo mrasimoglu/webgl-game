@@ -1,5 +1,5 @@
 class StaticMesh {
-    constructor(MeshFromJson, material,Shader, parentmesh)
+    constructor(MeshFromJson, material, Shader, parentmesh)
     {  
 
         this.parent = parentmesh;
@@ -33,20 +33,20 @@ class StaticMesh {
 
         }
         
-        this.initVertexArray(Shader.gl);
+        this.initVertexArray(Shader.gl, Shader.program);
         
     }
 
-    initData(gl, attrib, data, size)
+    initData(gl, program, attrib, data, size)
     {
-        var loc = gl.getAttribLocation(gl.program, attrib);
+        var loc = gl.getAttribLocation(program, attrib);
         gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
         gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
         gl.vertexAttribPointer(loc,size,gl.FLOAT, gl.FALSE, 0, 0);
         gl.enableVertexAttribArray(loc);
     }
 
-    initVertexArray(gl)
+    initVertexArray(gl, program)
     {
        
         gl.bindVertexArray(this.vao);
@@ -54,17 +54,17 @@ class StaticMesh {
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.createBuffer());
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.indices, gl.STATIC_DRAW);
          
-        this.initData(gl, 'a_Position', this.vertices, 3);
-        this.initData(gl, 'a_Normal', this.normals, 3);
+        this.initData(gl, program, 'a_Position', this.vertices, 3);
+        this.initData(gl, program, 'a_Normal', this.normals, 3);
         
         if(this.texcoords)
-            this.initData(gl, 'a_TexCoords', this.normals, 2);
+            this.initData(gl, program, 'a_TexCoords', this.normals, 2);
         
         if(this.parent.bones.getLength() > 0)
         {
             
-            this.initData(gl, 'a_BoneIds', this.BoneIds, 3);
-            this.initData(gl, 'a_Weights', this.a_Weights, 3);
+            this.initData(gl, program, 'a_BoneIds', this.BoneIds, 3);
+            this.initData(gl, program, 'a_Weights', this.a_Weights, 3);
                  
         }
 

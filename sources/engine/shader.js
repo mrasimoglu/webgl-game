@@ -1,27 +1,18 @@
 class Shader {
-    constructor(gl, attributes, uniforms)
+    constructor(gl, program, uniforms)
     {
         this.gl = gl;    
-        
-        this.IndicesBuffer = gl.createBuffer();
-        this.attriblocations = new Object();
+        this.program = program;
+        gl.useProgram(program);
         uniforms.forEach((uniform)=>{
-            this[uniform] = gl.getUniformLocation(gl.program, uniform);
+            this[uniform] = gl.getUniformLocation(program, uniform);
             if(!this[uniform]){
                 console.log(uniform);
                 console.log("uniform error");
                 return;
             }
         });
-        attributes.forEach((attribute)=>{
-            this[attribute] = gl.createBuffer();
-            if(!this[attribute]){
-                console.log("buffer error");
-                return;
-            }
-            this.attriblocations[attribute] = this.gl.getAttribLocation(this.gl.program, attribute);
-         
-        });
+
         
         this.gl.uniform3fv(this.u_lightColor, new Float32Array([1, 1, 1]));
     }

@@ -34,7 +34,7 @@ class Mesh {
     }
     drawMesh(Shader, ModelMatrix)
     {   
-       
+        Shader.gl.useProgram(Shader.program);
     
         Shader.gl.bindTexture(Shader.gl.TEXTURE_2D, null);
         if(this.bones.getLength() > 0)
