@@ -48,7 +48,7 @@ class Game
 
     render()
     {
-        this.environmentModels.terrain.drawModel(glMatrix.mat4.create());
+      //  this.environmentModels.terrain.drawModel(glMatrix.mat4.create());
 
         this.rightBuildings.forEach((b) => {
             b.render();

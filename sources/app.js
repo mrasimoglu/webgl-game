@@ -41,11 +41,11 @@ var Init = async function()
     }
    // gl2.enable(gl.DEPTH_TEST);
     var SkyboxShader = new Shader(gl, prog, 
-        []);
+        ['u_ProjectionMatrix', 'u_ViewMatrix']);
 
-    var buildingPaths = ["models/cube.json"];
-    var enemiesPaths = [];
-    var terrainPath= [];
+    var buildingPaths = ["models/buildings/nationalBank.json"];
+    var enemiesPaths = ["models/characters/enemy1.json"];
+    var terrainPath= ["models/terrain.json"];
     var skyBoxPath = ["models/skybox.json"];
    
 
@@ -56,7 +56,7 @@ var Init = async function()
     var skyBoxJSON = await getModels(skyBoxPath);
     skyBoxJSON = skyBoxJSON[0];
 
-    var generalJSONs = {};
+    var generalJSONs = {"terrain": terrainJSON[0]};
 
     Run(gl, buildingJSON, enemiesJSONs, generalJSONs, skyBoxJSON, GeneralShader, SkyboxShader, aspectratio);
 
@@ -82,10 +82,14 @@ function Run(gl, buildingJSONs, enemiesJSONs, generalJSONs, skyBoxJSON, GeneralS
         generalModels[k] = new Model(generalJSONs[k], GeneralShader);
     }
 
-    var skyBox = new Skybox(SkyboxShader, ["Daylight_Box_Back.bmp", "Daylight_Box_Bottom.bmp" ,"Daylight_Box_Front.bmp" ,"Daylight_Box_Left.bmp" ,"Daylight_Box_Right.bmp" ,"Daylight_Box_Top.bmp"], skyBoxJSON);
+    var skyBox = new Skybox(SkyboxShader, ["textures/skybox/right.png", "textures/skybox/left.png" ,
+        "textures/skybox/top.png" ,"textures/skybox/bottom.png" ,
+        "textures/skybox/front.png" ,"textures/skybox/back.png"], 
+        skyBoxJSON);
     console.log();
     
-    var Lx=0,Ly=1500,Lz=-1000; //Camera position
+    var Lx=0,Ly=1000,Lz=-1000
+; //Camera position
     var before = Date.now(); var now = Date.now(); //for FPS calculation
 
    var game = new Game(buildingModels, enemyModels, generalModels);
@@ -105,10 +109,33 @@ function Run(gl, buildingJSONs, enemiesJSONs, generalJSONs, skyBoxJSON, GeneralS
         var projectionMatrix = new Matrix4();
         projectionMatrix.setPerspective(30, aspectratio, 1, 10000);
         gl.uniformMatrix4fv(GeneralShader.u_ProjectionMatrix, false, projectionMatrix.elements);
-        
-        
-        game.render();
 
+        gl.useProgram(SkyboxShader.program);
+  
+        var tv3 = glMatrix.vec3.create();
+        var sv3 = glMatrix.vec3.create();
+        var ma = glMatrix.mat4.clone(viewMatrix.elements);
+        //glMatrix.mat4.transpose(ma, viewMatrix.elements);
+      //  glMatrix.mat4.getTranslation(tv3, viewMatrix.elements);
+       // console.log([-tv3[0], -tv3[1] ,-tv3[2]]);
+        //console.log(viewMatrix.elements);
+        
+      //  glMatrix.mat4.translate(ma, viewMatrix.elements, [-tv3[0], -tv3[1] ,-tv3[2]]);
+        ma[12] = 0;
+        ma[13] = 0;
+        ma[14] = 0;
+       
+   
+
+        
+        gl.uniformMatrix4fv(SkyboxShader.u_ViewMatrix, false, ma);
+        gl.uniformMatrix4fv(SkyboxShader.u_ProjectionMatrix, false, projectionMatrix.elements);
+    
+        game.render();
+        gl.depthFunc(gl.LEQUAL);
+        skyBox.render();
+        gl.depthFunc(gl.LESS);
+     
         /*buildingModels.forEach((model)=>{
 
             

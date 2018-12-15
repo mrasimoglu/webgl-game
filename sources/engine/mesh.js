@@ -51,7 +51,7 @@ class Mesh {
         }
 
 
-        if(this.staticMesh.material.diffusemaps.length > 0)
+        if(this.staticMesh.material!=null && this.staticMesh.material.diffusemaps.length > 0)
         {
             Shader.gl.bindTexture(Shader.gl.TEXTURE_2D, this.staticMesh.material.diffusemaps[0]);
             Shader.gl.activeTexture(Shader.gl.TEXTURE0);
@@ -63,16 +63,16 @@ class Mesh {
             Shader.gl.uniform1f(Shader.u_HasTex, 0.9);
             
         }
-        else
+        else if (this.staticMesh.material!=null)
         {
-            Shader.disableVertexAttribArray('a_TexCoords');
+           // Shader.disableVertexAttribArray('a_TexCoords');
             Shader.gl.uniform1f(Shader.u_HasTex, 0.1);
             //console.log("yok" + this.name + this.material.diffuse + this.material.ambient);
             Shader.gl.uniform3fv(Shader.u_diffuse, this.staticMesh.material.diffuse);
             Shader.gl.uniform3fv(Shader.u_ambient, this.staticMesh.material.ambient);
         }
             
-        if(this.staticMesh.material.specular)
+        if(this.staticMesh.material!=null && this.staticMesh.material.specular)
         {
             Shader.gl.uniform1f(Shader.u_shiness, this.staticMesh.material.shiness);
             Shader.gl.uniform3fv(Shader.u_specular, this.staticMesh.material.specular);

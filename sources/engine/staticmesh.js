@@ -1,7 +1,7 @@
 class StaticMesh {
     constructor(MeshFromJson, material, Shader, parentmesh)
     {  
-
+      
         this.parent = parentmesh;
         var gl = Shader.gl;
         this.vao = gl.createVertexArray();
@@ -39,6 +39,7 @@ class StaticMesh {
 
     initData(gl, program, attrib, data, size)
     {
+      
         var loc = gl.getAttribLocation(program, attrib);
         gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
         gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
@@ -58,7 +59,7 @@ class StaticMesh {
         this.initData(gl, program, 'a_Normal', this.normals, 3);
         
         if(this.texcoords)
-            this.initData(gl, program, 'a_TexCoords', this.normals, 2);
+            this.initData(gl, program, 'a_TexCoords', this.texcoords, 2);
         
         if(this.parent.bones.getLength() > 0)
         {

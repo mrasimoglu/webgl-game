@@ -29,6 +29,11 @@ var loadImage = function (url) {
     });
 };
 
+var loadImageawait = async function (url) {
+    return await loadImage(url);
+};
+
+
 var loadJSONResource = (url) => { 
     return new Promise((resolve, reject) => {
         loadTextResource(url).then((r)=> {
