@@ -10,5 +10,5 @@ varying vec3 v_TexCoords;
 
 void main()
 {
-    gl_FragColor = textureCube(skybox, v_TexCoords);
+    gl_FragColor = textureCube(skybox, -v_TexCoords);
 }

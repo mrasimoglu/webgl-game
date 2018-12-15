@@ -30,7 +30,7 @@ class StaticMesh {
             
             this.sortWeights();
             this.clearWeights();
-
+           
         }
         
         this.initVertexArray(Shader.gl, Shader.program);
@@ -39,7 +39,7 @@ class StaticMesh {
 
     initData(gl, program, attrib, data, size)
     {
-      
+     
         var loc = gl.getAttribLocation(program, attrib);
         gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
         gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
@@ -65,7 +65,7 @@ class StaticMesh {
         {
             
             this.initData(gl, program, 'a_BoneIds', this.BoneIds, 3);
-            this.initData(gl, program, 'a_Weights', this.a_Weights, 3);
+            this.initData(gl, program, 'a_Weights', this.Weights, 3);
                  
         }
 
@@ -75,6 +75,7 @@ class StaticMesh {
     }
 
     pushWeight(boneid, aweight) {
+       
         var vert = aweight[0];
         var impact = aweight[1];
 
@@ -87,6 +88,9 @@ class StaticMesh {
     }
 
     clearWeights(maxweight=3){
+        
+        
+        console.log(this.parent.name);
         for(var i =0; i<this.vertices.length/3;i++)
         {
             this.WeightInfo[i].splice(maxweight);

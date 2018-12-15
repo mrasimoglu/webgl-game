@@ -81,8 +81,8 @@ class Model {
     {
          glMatrix.mat4.transpose(ModelMatrix, ModelMatrix);
        // this.drawModell(this.root, glMatrix.mat4.clone(ModelMatrix));
-       // console.log("--");
-       this.meshes.forEach((mesh)=>{
+        // console.log("--");
+        this.meshes.forEach((mesh)=>{
            mesh.transformation.forEach((trans) => {
             var ma = glMatrix.mat4.create();
 

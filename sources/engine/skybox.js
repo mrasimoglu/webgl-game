@@ -1,55 +1,53 @@
 class SkyboxMesh
 {
-    constructor(MeshFromJson, Shader, tex) 
+    constructor(Shader, tex) 
     {
-        this.name = MeshFromJson.name;
         this.vao = Shader.gl.createVertexArray();
         this.texture = tex;
-        this.vertices = Float32Array.from(MeshFromJson.vertices);
+
         this.vertices = Float32Array.from([
-        -1.0,  1.0, -1.0,
-        -1.0, -1.0, -1.0,
-         1.0, -1.0, -1.0,
-         1.0, -1.0, -1.0,
-         1.0,  1.0, -1.0,
-        -1.0,  1.0, -1.0,
+            -1.0,  1.0, -1.0,
+            -1.0, -1.0, -1.0,
+            1.0, -1.0, -1.0,
+            1.0, -1.0, -1.0,
+            1.0,  1.0, -1.0,
+            -1.0,  1.0, -1.0,
 
-        -1.0, -1.0,  1.0,
-        -1.0, -1.0, -1.0,
-        -1.0,  1.0, -1.0,
-        -1.0,  1.0, -1.0,
-        -1.0,  1.0,  1.0,
-        -1.0, -1.0,  1.0,
+            1.0, -1.0, -1.0,
+            1.0, -1.0,  1.0,
+            1.0,  1.0,  1.0,
+            1.0,  1.0,  1.0,
+            1.0,  1.0, -1.0,
+            1.0, -1.0, -1.0,
 
-         1.0, -1.0, -1.0,
-         1.0, -1.0,  1.0,
-         1.0,  1.0,  1.0,
-         1.0,  1.0,  1.0,
-         1.0,  1.0, -1.0,
-         1.0, -1.0, -1.0,
+            -1.0, -1.0,  1.0,
+            -1.0, -1.0, -1.0,
+            -1.0,  1.0, -1.0,
+            -1.0,  1.0, -1.0,
+            -1.0,  1.0,  1.0,
+            -1.0, -1.0,  1.0,
 
-        -1.0, -1.0,  1.0,
-        -1.0,  1.0,  1.0,
-         1.0,  1.0,  1.0,
-         1.0,  1.0,  1.0,
-         1.0, -1.0,  1.0,
-        -1.0, -1.0,  1.0,
+            -1.0, -1.0,  1.0,
+            -1.0,  1.0,  1.0,
+            1.0,  1.0,  1.0,
+            1.0,  1.0,  1.0,
+            1.0, -1.0,  1.0,
+            -1.0, -1.0,  1.0,
 
-        -1.0,  1.0, -1.0,
-         1.0,  1.0, -1.0,
-         1.0,  1.0,  1.0,
-         1.0,  1.0,  1.0,
-        -1.0,  1.0,  1.0,
-        -1.0,  1.0, -1.0,
+            -1.0,  1.0, -1.0,
+            1.0,  1.0, -1.0,
+            1.0,  1.0,  1.0,
+            1.0,  1.0,  1.0,
+            -1.0,  1.0,  1.0,
+            -1.0,  1.0, -1.0,
 
-        -1.0, -1.0, -1.0,
-        -1.0, -1.0,  1.0,
-         1.0, -1.0, -1.0,
-         1.0, -1.0, -1.0,
-        -1.0, -1.0,  1.0,
-         1.0, -1.0,  1.0
+            -1.0, -1.0, -1.0,
+            -1.0, -1.0,  1.0,
+            1.0, -1.0, -1.0,
+            1.0, -1.0, -1.0,
+            -1.0, -1.0,  1.0,
+            1.0, -1.0,  1.0
         ]);
-        this.indices = Uint16Array.from([].concat.apply([], MeshFromJson.faces));
 
         this.initVertexArray(Shader.gl, Shader.program);
 
@@ -71,7 +69,6 @@ class SkyboxMesh
         gl.bindVertexArray(this.vao);
 
        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.createBuffer());
-       gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.indices, gl.STATIC_DRAW);
          
         this.initData(gl, program, 'a_Position', this.vertices, 3);
 
@@ -117,14 +114,14 @@ class CubeMap
             }
         });
      
-         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
         gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
         gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
         
         gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-       gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE);
-     gl.bindTexture(gl.TEXTURE_CUBE_MAP, null);
+        gl.bindTexture(gl.TEXTURE_CUBE_MAP, null);
     }
 
     async loadImages(textures)
@@ -143,11 +140,11 @@ class CubeMap
 
 class Skybox
 {
-    constructor(Shader, textures, SkyboxJSON)
+    constructor(Shader, textures)
     {
         this.Shader = Shader;
         this.cubemap = new CubeMap(Shader, textures);
-        this.mesh = new SkyboxMesh(SkyboxJSON.meshes[0],Shader, this.cubemap.Texture);
+        this.mesh = new SkyboxMesh(Shader, this.cubemap.Texture);
         console.log(Shader);
     }
 

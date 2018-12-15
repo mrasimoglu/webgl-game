@@ -1,8 +1,10 @@
 class Game
 {
-    constructor(buildingModels, enemyModels, environmentModels)
+    constructor(buildingModels, enemyModels, environmentModels, playerModel)
     {
-        this.player = new Player();
+        this.player = new Player(playerModel);
+
+        this.camera = new Camera(glMatrix.vec3.fromValues(-250, 100 ,0), this.player.transformation);
 
         this.enemyModels = enemyModels;
         this.environmentModels = environmentModels;
@@ -48,7 +50,7 @@ class Game
 
     render()
     {
-      //  this.environmentModels.terrain.drawModel(glMatrix.mat4.create());
+        this.environmentModels.terrain.drawModel(glMatrix.mat4.create());
 
         this.rightBuildings.forEach((b) => {
             b.render();
@@ -56,6 +58,8 @@ class Game
         this.leftBuildings.forEach((b) => {
             b.render();
         });
+
+        this.player.render();
     }
 }
 
@@ -63,7 +67,27 @@ class Player
 {
     constructor(model)
     {
-        this.model = model;
+        this.transformation = glMatrix.mat4.create();;
+
+        this.ownModel = model[0];
+        this.horseModel = model[1];
+
+        this.ownModel.animator.playAnimation(0);
+        this.horseModel.animator.playAnimation(0);
+    }
+
+    render()
+    {
+        this.ownModel.callAnimator();
+        this.horseModel.callAnimator();
+        this.ownModel.drawModel(glMatrix.mat4.clone(this.transformation));
+        this.horseModel.drawModel(glMatrix.mat4.clone(this.transformation));
+        this.moveYourAss();
+    }
+
+    moveYourAss()
+    {
+        glMatrix.mat4.translate(this.transformation, this.transformation, [1,0,0]);
     }
 }
 
@@ -128,7 +152,6 @@ class Building
             enemy.model.drawModel(Trans);
 
         });
-        this.model.callAnimator();
         this.model.drawModel(glMatrix.mat4.clone(this.transformation));
     }
 }
@@ -141,3 +164,25 @@ class Enemy
     }
 }
 
+class Camera
+{
+    constructor(offset, target)
+    {
+        this.direction = glMatrix.vec3.fromValues(0,1,0);
+        this.offset = offset;
+        this.target = target;
+    }
+
+    getViewMatrix()
+    {   
+        var a = glMatrix.vec3.create();
+        var b = glMatrix.vec3.create();
+        glMatrix.mat4.getTranslation(b, this.target);
+        glMatrix.vec3.add(a,this.offset,b);
+      
+        var tmp = glMatrix.mat4.create();
+ 
+        glMatrix.mat4.lookAt(tmp,a,b,this.direction);
+        return tmp;
+    }
+}

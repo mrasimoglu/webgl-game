@@ -22,11 +22,11 @@ class Mesh {
         var newone = Object.create(Mesh.prototype);
         newone.name = this.name;
         newone.staticMesh = this.staticMesh;
-       // newone.transformation = glMatrix.mat4.clone(this.transformation);
-       newone.transformation = [];
-       this.transformation.forEach(trans => {
-           newone.transformation.push(glMatrix.mat4.clone(trans));
-       });
+        // newone.transformation = glMatrix.mat4.clone(this.transformation);
+        newone.transformation = [];
+        this.transformation.forEach(trans => {
+            newone.transformation.push(glMatrix.mat4.clone(trans));
+        });
         newone.finaltransformation = glMatrix.mat4.clone(this.finaltransformation);
         newone.name = this.name;
         newone.bones = this.bones.copy();
@@ -42,8 +42,6 @@ class Mesh {
             var flatBones = this.bones.getBonesFinalFlat();
             Shader.gl.uniformMatrix4fv(Shader.u_Bones, false, Float32Array.from(flatBones));
             Shader.gl.uniform1f(Shader.u_HasBones, true);
-           
-            
         }
         else
         {
@@ -84,9 +82,6 @@ class Mesh {
         }
        
         Shader.gl.uniformMatrix4fv(Shader.u_ModelMatrix, false, ModelMatrix);
-        
-      //  Shader.initArrayBuffer(this.staticMesh.vertices, 'a_Position', 3, 0, 0);
-       // Shader.initArrayBuffer(this.staticMesh.normals, 'a_Normal', 3, 0, 0);
 
        Shader.gl.bindVertexArray(this.staticMesh.vao);
 
@@ -95,11 +90,6 @@ class Mesh {
         glMatrix.mat4.transpose(ModelMatrix, ModelMatrix);
         
         Shader.gl.uniformMatrix4fv(Shader.u_NormalMatrix, false, ModelMatrix);
-        //ÜÇGENLERİN BAĞLANTILARINI AKTARIYORUZ.
-
-     
-        //ÜÇGENLERİN BAĞLANTILARINI AKTARIYORUZ.
-
         
         Shader.gl.drawElements(Shader.gl.TRIANGLES, this.staticMesh.indices.length, Shader.gl.UNSIGNED_SHORT, 0);
         Shader.gl.bindVertexArray(null);
