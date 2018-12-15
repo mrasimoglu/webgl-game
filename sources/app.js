@@ -2,7 +2,7 @@ var ax = 10, ay = 20;
 var kx = -60, ky = 2, kz = -300;//light position
 var s = 1;
 var isPlay = false;
-
+var DeltaTime = 0;
 var Init = async function() 
 {
     var canvas = document.getElementById("mycanvas");
@@ -125,7 +125,11 @@ function Run(gl, buildingJSONs, enemiesJSONs,playerJSON, generalJSONs, GeneralSh
         gl.depthFunc(gl.LEQUAL);
         skyBox.render();
         gl.depthFunc(gl.LESS);
-    
+        
+        now = Date.now();
+        DeltaTime = now - before;
+        before = now;
+
         requestAnimationFrame(loop);
     }
     loop();

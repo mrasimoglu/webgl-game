@@ -87,7 +87,7 @@ class Player
 
     moveYourAss()
     {
-        glMatrix.mat4.translate(this.transformation, this.transformation, [1,0,0]);
+        glMatrix.mat4.translate(this.transformation, this.transformation, [0.01*DeltaTime,0,0]);
     }
 }
 
