@@ -43,7 +43,7 @@ var Init = async function()
     var SkyboxShader = new Shader(gl, prog, 
         ['u_ProjectionMatrix', 'u_ViewMatrix',]);
 
-    var buildingPaths = ["models/buildings/nationalBank.json"];
+    var buildingPaths = ["models/buildings/nationalBank.json","models/buildings/barn.json","models/buildings/church.json","models/buildings/blackSmith.json","models/buildings/hotelBlackSmith.json"];
     var enemiesPaths = ["models/characters/enemy1.json"];
     var terrainPath= ["models/terrain.json"];
     var playerPath = ["models/characters/cowboy.json", "models/characters/horse.json"];

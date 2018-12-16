@@ -4,7 +4,7 @@ class Game
     {
         this.player = new Player(playerModel);
 
-        this.camera = new Camera(glMatrix.vec3.fromValues(-250, 100 ,0), this.player.transformation);
+        this.camera = new Camera(glMatrix.vec3.fromValues(-100, 50 ,0), this.player.transformation);
 
         this.enemyModels = enemyModels;
         this.environmentModels = environmentModels;
@@ -181,6 +181,7 @@ class Camera
         glMatrix.vec3.add(a,this.offset,b);
       
         var tmp = glMatrix.mat4.create();
+        glMatrix.vec3.add(b,b,[0,25,0]);
  
         glMatrix.mat4.lookAt(tmp,a,b,this.direction);
         return tmp;
