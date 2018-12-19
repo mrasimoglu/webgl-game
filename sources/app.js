@@ -66,13 +66,12 @@ var Init = async function()
 function Run(gl, buildingJSONs, enemiesJSONs,playerJSON, generalJSONs, GeneralShader, SkyboxShader, aspectratio){
     var canvashud = document.getElementById("hud");
 
-    console.log(playerJSON);
   
     var buildingModels = [];
     buildingJSONs.forEach((model) => {
         buildingModels.push(new Model(model, GeneralShader));
     }); 
-    console.log(GeneralShader);
+
     var enemyModels = [];
     enemiesJSONs.forEach((model) => {
         enemyModels.push(new Model(model, GeneralShader));
@@ -94,7 +93,6 @@ function Run(gl, buildingJSONs, enemiesJSONs,playerJSON, generalJSONs, GeneralSh
         "textures/skybox/bottom.png" ,"textures/skybox/top.png" ,
         "textures/skybox/back.png" , "textures/skybox/front.png" ], 
     );
-    console.log();
     
     var Lx=0,Ly=100,Lz=-200; //Camera position
     var before = Date.now(); var now = Date.now(); //for FPS calculation
@@ -121,6 +119,7 @@ function Run(gl, buildingJSONs, enemiesJSONs,playerJSON, generalJSONs, GeneralSh
         gl.uniformMatrix4fv(SkyboxShader.u_ViewMatrix, false, viewMatrix);
         gl.uniformMatrix4fv(SkyboxShader.u_ProjectionMatrix, false, projectionMatrix.elements);
     
+        game.update();
         game.render();
         gl.depthFunc(gl.LEQUAL);
         skyBox.render();

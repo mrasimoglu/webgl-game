@@ -90,7 +90,6 @@ class StaticMesh {
     clearWeights(maxweight=3){
         
         
-        console.log(this.parent.name);
         for(var i =0; i<this.vertices.length/3;i++)
         {
             this.WeightInfo[i].splice(maxweight);

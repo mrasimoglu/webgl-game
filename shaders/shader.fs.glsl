@@ -31,7 +31,7 @@ void main(){
     vec3 lightDirection = normalize(u_lightPos-v_FragPos);
     float diff = max(dot(lightDirection, norm), 0.0);
     if(v_HasTex < 0.5){
-        ambient = ambientStrenght * u_lightColor * u_ambient;
+        ambient = ambientStrenght * u_lightColor * u_diffuse;
         diffuse = u_lightColor * diff * u_diffuse;
     }
     else

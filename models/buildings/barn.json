@@ -44,13 +44,36 @@
 					 0
 					,1
 				]
+				,"children": [
+					{
+						 "name": "EnemyPosition"
+						,"transformation": [
+							 4.08463
+							,0
+							,0
+							,8.88746e-029
+							,0
+							,571.596
+							,0
+							,32.9755
+							,0
+							,0
+							,5.37779
+							,5.05454e-008
+							,0
+							,0
+							,0
+							,1
+						]
+					}
+				]
 			}
 		]
 	}
 	,"flags": 8
 	,"meshes": [
 		{
-			 "name": "Cube.025"
+			 "name": "Cube.001"
 			,"materialindex": 0
 			,"primitivetypes": 4
 			,"vertices": [
@@ -7992,7 +8015,7 @@
 			]
 		}
 		,{
-			 "name": "Cube.025"
+			 "name": "Cube.001"
 			,"materialindex": 1
 			,"primitivetypes": 4
 			,"vertices": [
@@ -14407,7 +14430,7 @@
 					,"semantic": 0
 					,"index": 0
 					,"type": 3
-					,"value": "Material.064"
+					,"value": "Material.001"
 				}
 				,{
 					 "key": "$clr.diffuse"
@@ -14503,7 +14526,7 @@
 					,"semantic": 0
 					,"index": 0
 					,"type": 3
-					,"value": "Material.063"
+					,"value": "Material.002"
 				}
 				,{
 					 "key": "$clr.diffuse"

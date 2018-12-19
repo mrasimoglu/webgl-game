@@ -6,6 +6,15 @@ class Animator {
         this.animationStartTime = 0;
         this.animations = animations;
         this.Model = model;
+
+
+        this.extraRotations = {};
+    }
+
+    
+    addExtraRotation(bonename, angles)
+    {
+        this.extraRotations[bonename] = angles;
     }
 
     playAnimation(id)
@@ -28,13 +37,17 @@ class Animator {
         var NodeTransformation = glMatrix.mat4.clone(root.transformation);
        
         var currentAnimChannel = this.currentAnimation.channels.getChannelbyName(root.name);
-        
+        var currentAnimChannel = this.currentAnimation.channels.getChannelbyName(root.name);
+
         if(currentAnimChannel != undefined)
         {
             
             var RotationMatrix = glMatrix.mat4.create();
             var rquat = this.CalcInterpolatedRotation(currentAnimChannel.getRKey(ATime),currentAnimChannel.rotationkeys, ATime);
             glMatrix.mat4.fromQuat(RotationMatrix, rquat);
+
+          
+                
             
             var TransformationMatrix = glMatrix.mat4.create();
             var tv3 = this.CalcInterpolatedLocation(currentAnimChannel.getPKey(ATime),currentAnimChannel.positionkeys, ATime);
@@ -44,6 +57,17 @@ class Animator {
             var sv3 = this.CalcInterpolatedScaling(currentAnimChannel.getSKey(ATime),currentAnimChannel.scalingkeys, ATime);
             glMatrix.mat4.fromScaling(ScalingMatrix, sv3);
             
+            if(this.extraRotations[root.name] != undefined)
+            {
+                var rrquat = glMatrix.quat.clone(rquat);
+                glMatrix.quat.rotateX(rrquat, rrquat,(this.extraRotations[root.name][0]));
+                glMatrix.quat.rotateY(rrquat, rrquat,(this.extraRotations[root.name][1]));
+                glMatrix.quat.rotateZ(rrquat, rrquat,(this.extraRotations[root.name][2]));
+
+                
+                glMatrix.mat4.fromQuat(RotationMatrix, rrquat);
+            }
+
             glMatrix.mat4.mul(NodeTransformation, TransformationMatrix, RotationMatrix);
             glMatrix.mat4.mul(NodeTransformation, NodeTransformation, ScalingMatrix);
            

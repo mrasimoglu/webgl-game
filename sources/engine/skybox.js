@@ -105,7 +105,6 @@ class CubeMap
         this.loadImages(textures).then((texs)=>{
             for(var i = 0;i < 6;i++)
             {
-                console.log(gl.TEXTURE_CUBE_MAP_POSITIVE_X + i);
                 gl.texImage2D(
                     gl.TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, gl.RGBA,gl.RGBA,
                     gl.UNSIGNED_BYTE,
@@ -145,7 +144,6 @@ class Skybox
         this.Shader = Shader;
         this.cubemap = new CubeMap(Shader, textures);
         this.mesh = new SkyboxMesh(Shader, this.cubemap.Texture);
-        console.log(Shader);
     }
 
     render()

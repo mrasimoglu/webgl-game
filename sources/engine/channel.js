@@ -5,6 +5,8 @@ class Channel {
         this.positionkeys = [];
         this.rotationkeys = [];
         this.scalingkeys = [];
+        
+
         positionkeys.forEach((pkey) => {
             this.positionkeys.push({"time": pkey[0], "arr": Object.assign([], pkey[1])});
         });

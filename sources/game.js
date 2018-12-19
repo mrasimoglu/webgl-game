@@ -4,19 +4,22 @@ class Game
     {
         this.player = new Player(playerModel);
 
-        this.camera = new Camera(glMatrix.vec3.fromValues(-100, 50 ,0), this.player.transformation);
+        this.camera = new Camera(glMatrix.vec3.fromValues(-120, 40 ,0), this.player.transformation);
 
         this.enemyModels = enemyModels;
+   
         this.environmentModels = environmentModels;
 
         this.buildings = [];
         buildingModels.forEach(building => {
             this.buildings.push(new Building(building));
-          
         });
       
         this.leftBuildings = [];
         this.rightBuildings = [];
+
+        this.leftcount = 0;
+        this.rightcount = 0;
 
         this.initEnvironment();
 
@@ -32,34 +35,71 @@ class Game
     {
         for(var i = 0; i < 10; i++)
         {
-            var newbuild = this.buildings[Math.floor(Math.random()*this.buildings.length)].copy();
-            newbuild.initBuild(i*100,-100,this.enemyModels);
-            newbuild.model.animator.playAnimation(4);
-
-            this.leftBuildings.push(newbuild);
-           newbuild = this.buildings[Math.floor(Math.random()*this.buildings.length)].copy();
-            newbuild.initBuild(i*100,100,this.enemyModels);
-            newbuild.model.animator.playAnimation(0);
-            this.rightBuildings.push(newbuild);
+            this.rightBuildings.push(this.createNewBuilding(true));
+            
+            this.leftBuildings.push(this.createNewBuilding(false));
         }
 
         this.leftBuildings.forEach((b) => {
-            glMatrix.mat4.rotateY(b.transformation, b.transformation, glMatrix.glMatrix.toRadian(180));
         });
+    }
+
+    createNewBuilding(lr)
+    {
+        var newbuild = this.buildings[Math.floor(Math.random()*this.buildings.length)].copy();
+        if(lr ==true)
+        {
+            this.rightcount++;
+            newbuild.initBuild(this.rightcount * 150,100);
+        }
+        else
+        {
+            this.leftcount++;
+            newbuild.initBuild(this.leftcount * 150,-100);
+            glMatrix.mat4.rotateY(newbuild.transformation, newbuild.transformation, glMatrix.glMatrix.toRadian(180));
+        }
+           
+        newbuild.initEnemies(this.enemyModels, this.player.transformation);
+
+        return newbuild;
+    }
+
+    updateBuildings()
+    {
+        this.rightBuildings.shift();
+        this.leftBuildings.shift();
+
+        this.rightBuildings.push(this.createNewBuilding(true));
+        this.leftBuildings.push(this.createNewBuilding(false));
     }
 
     render()
     {
-        this.environmentModels.terrain.drawModel(glMatrix.mat4.create());
 
         this.rightBuildings.forEach((b) => {
             b.render();
+            var tmp = glMatrix.vec3.create();
+            glMatrix.mat4.getTranslation(tmp, b.transformation);
+            var ma = glMatrix.mat4.create();
+            glMatrix.mat4.fromTranslation(ma,[tmp[0] - 150, 0, 0]);
+            this.environmentModels.terrain.drawModel(ma);
+            
         });
         this.leftBuildings.forEach((b) => {
             b.render();
         });
 
         this.player.render();
+    }
+
+    update()
+    {
+        var tmp = glMatrix.vec3.create();
+        glMatrix.mat4.getTranslation(tmp, this.player.transformation);
+        if((tmp[0] / 150) > ( this.leftcount - 9))
+        {
+            this.updateBuildings();
+        }
     }
 }
 
@@ -87,7 +127,7 @@ class Player
 
     moveYourAss()
     {
-        glMatrix.mat4.translate(this.transformation, this.transformation, [0.01*DeltaTime,0,0]);
+        glMatrix.mat4.translate(this.transformation, this.transformation, [0.1*DeltaTime,0,0]);
     }
 }
 
@@ -112,15 +152,30 @@ class Building
         return newone;
     }
 
-    initBuild(x,y, EnemyModels)
+    initBuild(x,y, )
     {
+        
         this.transformation = glMatrix.mat4.create();
        
         glMatrix.mat4.translate(this.transformation, this.transformation, [x,0,y]);
 
+    }
+
+    initEnemies(EnemyModels, targetransformation)
+    {
+
         this.enemiesTransformations.forEach((trans)=>{
-            var enemy = EnemyModels[(Math.floor(Math.random()*EnemyModels.length))].copy();
-            this.enemies.push(new Enemy(enemy));
+        if(Math.random() > 0.3) // zorluk seviyesi
+        {
+            var enemy = EnemyModels[(Math.floor(Math.random() * EnemyModels.length))].copy();
+            var Trans = glMatrix.mat4.create();
+    
+            glMatrix.mat4.mul(Trans, this.transformation,trans);
+            glMatrix.mat4.scale(Trans, Trans, [0.01, 0.01, 0.01]);
+            glMatrix.mat4.rotateX(Trans, Trans, glMatrix.glMatrix.toRadian(90));
+            this.enemies.push(new Enemy(enemy, glMatrix.mat4.clone(Trans), targetransformation));
+        }
+                
         });
 
     }
@@ -139,17 +194,15 @@ class Building
         root.childs.forEach((child) => {
             this.findEnemiesTransformations(child, glMatrix.mat4.clone(parent));
         });
-        console.log(this);
+     
     }
 
     render()
     {
         this.enemies.forEach((enemy,id) => {
-            var Trans = glMatrix.mat4.create();
-            glMatrix.mat4.mul(Trans, this.transformation,this.enemiesTransformations[id]);
-            glMatrix.mat4.scale(Trans, Trans, [0.01, 0.01, 0.01]);
-            glMatrix.mat4.rotateX(Trans, Trans, glMatrix.glMatrix.toRadian(90));
-            enemy.model.drawModel(Trans);
+
+
+            enemy.render();
 
         });
         this.model.drawModel(glMatrix.mat4.clone(this.transformation));
@@ -158,9 +211,47 @@ class Building
 
 class Enemy
 {
-    constructor(model)
+    constructor(model, trans, target)
     {
+     
         this.model = model;
+        this.transformation = trans;
+        this.targetransformation = target;
+        this.v3tranlate = glMatrix.vec3.create();
+        glMatrix.mat4.getTranslation(this.v3tranlate, trans);
+
+
+    }
+
+    getAngleY()
+    {
+        var v31 = glMatrix.vec2.fromValues(this.v3tranlate[0], this.v3tranlate[2]);
+        var v32 = glMatrix.vec3.create();
+        glMatrix.mat4.getTranslation(v32, this.targetransformation);
+        var v30 = glMatrix.vec2.fromValues(v32[0], v32[2]);
+        glMatrix.vec2.sub(v31, v31,v30);
+        return Math.atan(v31[0]/v31[1]);
+    }
+    getAngleX()
+    {
+        var v31 = glMatrix.vec2.fromValues(this.v3tranlate[1], this.v3tranlate[2]);
+        var v32 = glMatrix.vec3.create();
+        glMatrix.mat4.getTranslation(v32, this.targetransformation);
+        var v30 = glMatrix.vec2.fromValues(v32[1], v32[2]);
+        glMatrix.vec2.sub(v31, v31,v30);
+        if(v31[1]< 0)
+            return -Math.atan(v31[0]/v31[1]);
+        else
+            return Math.atan(v31[0]/v31[1]);
+
+    }
+
+    render()
+    {   
+
+        this.model.animator.addExtraRotation("Enemy1", [this.getAngleX(),this.getAngleY(),0]);
+        this.model.callAnimator();
+        this.model.drawModel(glMatrix.mat4.clone(this.transformation));
     }
 }
 
@@ -181,9 +272,10 @@ class Camera
         glMatrix.vec3.add(a,this.offset,b);
       
         var tmp = glMatrix.mat4.create();
-        glMatrix.vec3.add(b,b,[0,25,0]);
+        glMatrix.vec3.add(b,b,[0,30,0]);
  
         glMatrix.mat4.lookAt(tmp,a,b,this.direction);
+        
         return tmp;
     }
 }
