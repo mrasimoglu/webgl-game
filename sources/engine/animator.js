@@ -37,7 +37,7 @@ class Animator {
         var NodeTransformation = glMatrix.mat4.clone(root.transformation);
        
         var currentAnimChannel = this.currentAnimation.channels.getChannelbyName(root.name);
-        var currentAnimChannel = this.currentAnimation.channels.getChannelbyName(root.name);
+
 
         if(currentAnimChannel != undefined)
         {
@@ -74,8 +74,10 @@ class Animator {
         }
 
         var GlobalTransformation = glMatrix.mat4.create();
-        glMatrix.mat4.mul(GlobalTransformation,ParentTransform,NodeTransformation);
-       
+        if(currentAnimChannel != undefined)
+            glMatrix.mat4.mul(GlobalTransformation,ParentTransform, NodeTransformation);
+        else
+            glMatrix.mat4.mul(GlobalTransformation,NodeTransformation, ParentTransform);
         var bones = this.Model.getBoneByName(root.name);
         
         if(bones.length > 0)
@@ -89,10 +91,18 @@ class Animator {
         }
        
             root.mesh.forEach(m => {
+                var mesh = this.Model.meshes[m];
+                
                 // console.log(root.name  + "animat");
                  var mmm  = glMatrix.mat4.create();
-                 glMatrix.mat4.transpose(mmm, GlobalTransformation);
-                 this.Model.meshes[m].transformation.push(glMatrix.mat4.clone(mmm));
+                // glMatrix.mat4.transpose(mmm, GlobalTransformation);
+                 if(mesh.name == "Cube.005")
+                {
+                    var t = glMatrix.vec3.create();
+                    glMatrix.mat4.getTranslation(t,mmm);
+                    console.log(t);
+                }
+                 mesh.transformation.push(glMatrix.mat4.clone(GlobalTransformation));
                //  console.log(GlobalTransformation);
              });
         

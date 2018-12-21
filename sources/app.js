@@ -109,7 +109,7 @@ function Run(gl, buildingJSONs, enemiesJSONs,playerJSON, generalJSONs, GeneralSh
         gl.uniform3fv(GeneralShader.u_viewPos, new Float32Array([Lx, Ly, Lz]));
 
         var t = glMatrix.mat4.create();
-        glMatrix.mat4.lookAt(t, [1350,30,0], [1350,0,-150], [0,1,0]);
+        glMatrix.mat4.lookAt(t, [1350,30,0], [1350,0,-200], [0,1,0]);
         var viewMatrix = glMatrix.mat4.clone(t);
         gl.uniformMatrix4fv(GeneralShader.u_ViewMatrix, false, viewMatrix);
         

@@ -76,6 +76,7 @@ class Model {
 
     loopinside(root, globaltranformation)
     {
+        
         glMatrix.mat4.mul(globaltranformation,  root.transformation,globaltranformation);
         if (root.meshes == undefined)
             var tmp = new Joint(root.name, root.transformation);
@@ -86,6 +87,7 @@ class Model {
                 var ma = glMatrix.mat4.clone(globaltranformation);
             
                 this.meshes[mesh].transformation.push(glMatrix.mat4.clone(ma));
+
             });
 
             var bones= this.getBoneByName(root.name);
@@ -119,8 +121,6 @@ class Model {
             {
                 glMatrix.mat4.mul(ma, trans, ModelMatrix);
                 
-         
-               
             }
             else
             {
@@ -129,14 +129,7 @@ class Model {
             }
            
             glMatrix.mat4.transpose(ma, ma);
-            if(mesh.name=="Cube.005")
-            {
-                //glMatrix.mat4.transpose(ma, ma);
-                var v3 = glMatrix.vec3.create();
-                glMatrix.mat4.getTranslation(v3, ma);
-                console.log(v3);
-                  
-            }
+        
             mesh.drawMesh(this.Shader, glMatrix.mat4.clone(ma));
            });
            
