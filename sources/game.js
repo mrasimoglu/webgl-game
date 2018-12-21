@@ -33,11 +33,11 @@ class Game
 
     initBuildings()
     {
-        for(var i = 0; i < 10; i++)
+        for(var i = 0; i < 1; i++)
         {
             this.rightBuildings.push(this.createNewBuilding(true));
             
-            this.leftBuildings.push(this.createNewBuilding(false));
+           // this.leftBuildings.push(this.createNewBuilding(false));
         }
 
         this.leftBuildings.forEach((b) => {
@@ -122,7 +122,7 @@ class Player
         this.horseModel.callAnimator();
         this.ownModel.drawModel(glMatrix.mat4.clone(this.transformation));
         this.horseModel.drawModel(glMatrix.mat4.clone(this.transformation));
-        this.moveYourAss();
+      //  this.moveYourAss();
     }
 
     moveYourAss()
@@ -213,12 +213,16 @@ class Enemy
 {
     constructor(model, trans, target)
     {
-     
+        
         this.model = model;
         this.transformation = trans;
         this.targetransformation = target;
         this.v3tranlate = glMatrix.vec3.create();
         glMatrix.mat4.getTranslation(this.v3tranlate, trans);
+
+        this.model.addBoundingBox("EnemyBoundingBoxVertex");
+        
+      
 
 
     }

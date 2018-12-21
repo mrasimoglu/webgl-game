@@ -76,7 +76,8 @@ function Run(gl, buildingJSONs, enemiesJSONs,playerJSON, generalJSONs, GeneralSh
     enemiesJSONs.forEach((model) => {
         enemyModels.push(new Model(model, GeneralShader));
     });
-
+    console.log(enemyModels);
+    console.log(buildingModels);
     var generalModels = new Object();
     for (var k in generalJSONs){
         generalModels[k] = new Model(generalJSONs[k], GeneralShader);
@@ -107,7 +108,9 @@ function Run(gl, buildingJSONs, enemiesJSONs,playerJSON, generalJSONs, GeneralSh
         gl.uniform3fv(GeneralShader.u_lightPos, new Float32Array([kx, ky, kz]));
         gl.uniform3fv(GeneralShader.u_viewPos, new Float32Array([Lx, Ly, Lz]));
 
-        var viewMatrix = glMatrix.mat4.clone(game.camera.getViewMatrix());
+        var t = glMatrix.mat4.create();
+        glMatrix.mat4.lookAt(t, [1350,30,0], [1350,0,-150], [0,1,0]);
+        var viewMatrix = glMatrix.mat4.clone(t);
         gl.uniformMatrix4fv(GeneralShader.u_ViewMatrix, false, viewMatrix);
         
         var projectionMatrix = new Matrix4();
@@ -124,7 +127,6 @@ function Run(gl, buildingJSONs, enemiesJSONs,playerJSON, generalJSONs, GeneralSh
         gl.depthFunc(gl.LEQUAL);
         skyBox.render();
         gl.depthFunc(gl.LESS);
-        
         now = Date.now();
         DeltaTime = now - before;
         before = now;

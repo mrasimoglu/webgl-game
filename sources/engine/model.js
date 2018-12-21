@@ -43,8 +43,35 @@ class Model {
         this.meshes.forEach(mesh => {
             newone.meshes.push(mesh.copy());
         });
+
+        if(this.boundings != undefined)
+            newone.boundings = this.boundings;
+
         return newone;
 
+    }
+
+
+    addBoundingBox(target)
+    {
+        this.boundings = [];
+        this.loopForBoundingBox(this.root, target, glMatrix.mat4.create());
+    }
+
+    loopForBoundingBox(root, target, parent)
+    {
+      
+        glMatrix.mat4.mul(parent, root.transformation, parent);
+        if(root.name.startsWith(target))
+        {
+            var tmp = glMatrix.vec3.create();
+            glMatrix.mat4.getTranslation(tmp, parent);
+            this.boundings.push(tmp);
+        }
+        root.childs.forEach((child) => {
+            this.loopForBoundingBox(child, target, glMatrix.mat4.clone(parent));
+        });  
+        
     }
 
     loopinside(root, globaltranformation)
@@ -55,11 +82,12 @@ class Model {
         else
         {
             var tmp = new Joint(root.name, root.transformation, root.meshes);
-               root.meshes.forEach((mesh) =>{
+            root.meshes.forEach((mesh) =>{
                 var ma = glMatrix.mat4.clone(globaltranformation);
             
                 this.meshes[mesh].transformation.push(glMatrix.mat4.clone(ma));
             });
+
             var bones= this.getBoneByName(root.name);
     
             bones.forEach((bone)=>{
@@ -89,8 +117,10 @@ class Model {
            // glMatrix.mat4.mul(ma, ma, trans);
             if(mesh.bones.getLength() <= 0)
             {
-                
                 glMatrix.mat4.mul(ma, trans, ModelMatrix);
+                
+         
+               
             }
             else
             {
@@ -99,7 +129,15 @@ class Model {
             }
            
             glMatrix.mat4.transpose(ma, ma);
-            mesh.drawMesh(this.Shader, ma);
+            if(mesh.name=="Cube.005")
+            {
+                //glMatrix.mat4.transpose(ma, ma);
+                var v3 = glMatrix.vec3.create();
+                glMatrix.mat4.getTranslation(v3, ma);
+                console.log(v3);
+                  
+            }
+            mesh.drawMesh(this.Shader, glMatrix.mat4.clone(ma));
            });
            
         });
