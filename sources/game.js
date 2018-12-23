@@ -21,14 +21,25 @@ class Game
         this.leftcount = 0;
         this.rightcount = 0;
 
-        this.initEnvironment();
+        console.log(this);
 
         this.initBuildings(this.buildings, this.enemies);
     }
 
-    initEnvironment()
+    checkClicks(ray_origin, ray_direction)
     {
         
+        this.leftBuildings.forEach(left => {
+            left.enemies.forEach(enemy => {
+                var aabb_min = enemy.model.boundings[1];
+                var aabb_max = enemy.model.boundings[0];
+                var ma = glMatrix.mat4.clone(enemy.transformation);
+                //glMatrix.mat4.transpose(ma, ma);
+        
+           
+                console.log(TestRayOBBIntersection(ray_origin, ray_direction, aabb_min, aabb_max, ma));
+            });
+        });
     }
 
     initBuildings()
@@ -37,7 +48,7 @@ class Game
         {
             this.rightBuildings.push(this.createNewBuilding(true));
             
-           // this.leftBuildings.push(this.createNewBuilding(false));
+        
         }
 
         this.leftBuildings.forEach((b) => {

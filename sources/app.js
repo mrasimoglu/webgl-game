@@ -98,7 +98,11 @@ function Run(gl, buildingJSONs, enemiesJSONs,playerJSON, generalJSONs, GeneralSh
     var Lx=0,Ly=100,Lz=-200; //Camera position
     var before = Date.now(); var now = Date.now(); //for FPS calculation
 
-   var game = new Game(buildingModels, enemyModels, generalModels, playerModels);
+    var RayMatrix = glMatrix.mat4.create();
+    var RayStart_world = glMatrix.vec4.create();
+    var RayEnd_world = glMatrix.vec4.create();
+    var RayDir_world = glMatrix.vec3.create();
+    var game = new Game(buildingModels, enemyModels, generalModels, playerModels);
   
     const loop = () => {
         gl.useProgram(GeneralShader.program);
@@ -121,7 +125,28 @@ function Run(gl, buildingJSONs, enemiesJSONs,playerJSON, generalJSONs, GeneralSh
  
         gl.uniformMatrix4fv(SkyboxShader.u_ViewMatrix, false, viewMatrix);
         gl.uniformMatrix4fv(SkyboxShader.u_ProjectionMatrix, false, projectionMatrix.elements);
-    
+        
+        if(clicked)
+        {
+            glMatrix.mat4.mul(RayMatrix, projectionMatrix.elements, viewMatrix);
+            glMatrix.mat4.invert(RayMatrix, RayMatrix);
+            glMatrix.vec4.transformMat4(RayStart_world, RayStart_NDC, RayMatrix);
+            glMatrix.vec4.scale(RayStart_world, RayStart_world, 1/RayStart_world[3]);
+            glMatrix.vec4.transformMat4(RayEnd_world, RayEnd_NDC, RayMatrix);
+            glMatrix.vec4.scale(RayEnd_world, RayEnd_world, 1/RayEnd_world[3])
+            
+            glMatrix.vec3.sub(RayDir_world, RayEnd_world, RayStart_world);
+         
+            glMatrix.vec3.normalize(RayDir_world, RayDir_world);
+            
+            clicked = false;
+            
+            game.checkClicks(RayStart_world, RayDir_world)
+        }
+
+
+
+
         game.update();
         game.render();
         gl.depthFunc(gl.LEQUAL);
@@ -159,27 +184,23 @@ function Run(gl, buildingJSONs, enemiesJSONs,playerJSON, generalJSONs, GeneralSh
             break;
         }
     };
+    
+   
+    var RayStart_NDC = glMatrix.vec4.create();
+    var RayEnd_NDC = glMatrix.vec4.create();
     canvashud.onmousedown = (event) => {;
-        var x = event.clientX, y = event.clientY;
-        var difx = 0;
-        var dify = 0;
+       var x =((event.layerX/canvashud.width-0.5)*2)
+       var y = ((event.layerY/canvashud.height-0.5)*-2)
         
-        canvashud.onmousemove = (event2) => {
-            difx = event2.clientX - x;
-            dify = event2.clientY - y;
-            var rMatrix =  new Matrix4();
-            rMatrix.setRotate(dify, -1, 0 ,0);
-            rMatrix.rotate(difx, 0, -1 ,0);
-            var pp = new Vector4([Lx, Ly, Lz, 1]);
-            var np = rMatrix.multiplyVector4(pp);
-            Lx = np.elements[0]; Ly = np.elements[1]; Lz = np.elements[2];
-
-            x = event2.clientX;
-            y = event2.clientY;
-        };
+       glMatrix.vec4.set(RayStart_NDC, x, y, -1, 1);
+       glMatrix.vec4.set(RayEnd_NDC, x, y, 0, 1);
+     
+       clicked = true;
+       
+       
     };
     canvashud.onmouseup = (event) => {
-        canvashud.onmousemove = null;
+      
     };
     canvashud.onmousewheel = (event) => {
         rate  = Lx*Lx + Ly*Ly + Lz*Lz;
@@ -190,3 +211,125 @@ function Run(gl, buildingJSONs, enemiesJSONs,playerJSON, generalJSONs, GeneralSh
         Lz -= Lz/rate;
     };
 }
+
+
+function TestRayOBBIntersection(
+    ray_origin, 
+    ray_direction,
+    aabb_min,
+    aabb_max,
+    ModelMatrix
+)
+{
+    var tMin = 0;
+    var tMax = 100000;
+    
+    var OBBposition_worldspace = glMatrix.vec3.fromValues(ModelMatrix[12], ModelMatrix[13], ModelMatrix[14]);
+    var delta = glMatrix.vec3.create();
+    glMatrix.vec3.sub(delta, OBBposition_worldspace, ray_origin);
+
+    
+        var xaxis = glMatrix.vec3.fromValues(ModelMatrix[0],ModelMatrix[1],ModelMatrix[2]);
+        var e = glMatrix.vec3.dot(xaxis, delta);
+        var f = glMatrix.vec3.dot(ray_direction, xaxis);
+
+        if(Math.abs(f) > 0.001)
+        {
+            var t1 = (e+aabb_min[0])/f;
+            var t2 = (e+aabb_max[0])/f;
+
+            if (t1 > t2)
+            {
+                var w = t1;
+                t1=t2;
+                t2=w;
+            }
+
+            if(t2 < tMax)
+                tMax = t2;
+            if(t1 > tMin)
+                tMin = t1;
+            
+            if( tMax < tMin )
+                return false;
+            
+        }
+        else
+        {
+            
+            if(-e+aabb_min[0] > 0  || -e+aabb_max[0] < 0)
+                return false;
+        }
+    
+
+    
+        var yaxis = glMatrix.vec3.fromValues(ModelMatrix[4],ModelMatrix[5],ModelMatrix[6]);
+        var e = glMatrix.vec3.dot(yaxis, delta);
+        var f = glMatrix.vec3.dot(ray_direction, yaxis);
+        
+        if(Math.abs(f) > 0.001)
+        {
+            var t1 = (e+aabb_min[1])/f;
+            var t2 = (e+aabb_max[1])/f;
+
+            if (t1 > t2)
+            {
+                var w = t1;
+                t1=t2;
+                t2=w;
+            }
+
+            if(t2 < tMax)
+                tMax = t2;
+            if(t1 > tMin)
+                tMin = t1;
+            
+            if( tMax < tMin )
+                return false;
+            
+        }
+        else
+        {
+            if(-e+aabb_min[1] > 0  || -e+aabb_max[1] < 0)
+                return false;
+        }
+    
+
+    
+        var zaxis = glMatrix.vec3.fromValues(ModelMatrix[8],ModelMatrix[9],ModelMatrix[10]);
+        var e = glMatrix.vec3.dot(zaxis, delta);
+        var f = glMatrix.vec3.dot(ray_direction, zaxis);
+        
+        if(Math.abs(f) > 0.001)
+        {
+            var t1 = (e+aabb_min[2])/f;
+            var t2 = (e+aabb_max[2])/f;
+
+            if (t1 > t2)
+            {
+                var w = t1;
+                t1=t2;
+                t2=w;
+            }
+
+            if(t2 < tMax)
+                tMax = t2;
+            if(t1 > tMin)
+                tMin = t1;
+            
+            if( tMax < tMin )
+                return false;
+            
+        }
+        else
+        {
+            if(-e+aabb_min[2] > 0  || -e+aabb_max[2] < 0)
+                return false;
+        }
+    
+
+    return true;
+
+}
+
+var clicked = false;

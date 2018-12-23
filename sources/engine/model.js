@@ -65,7 +65,9 @@ class Model {
         if(root.name.startsWith(target))
         {
             var tmp = glMatrix.vec3.create();
-            glMatrix.mat4.getTranslation(tmp, parent);
+            var ma = glMatrix.mat4.clone(parent);
+            glMatrix.mat4.transpose(ma, ma);
+            glMatrix.mat4.getTranslation(tmp, ma);
             this.boundings.push(tmp);
         }
         root.childs.forEach((child) => {
