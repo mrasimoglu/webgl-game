@@ -34,20 +34,33 @@ class Game
                 var aabb_min = enemy.model.boundings[1];
                 var aabb_max = enemy.model.boundings[0];
                 var ma = glMatrix.mat4.clone(enemy.transformation);
-                //glMatrix.mat4.transpose(ma, ma);
+                
         
            
-                console.log(TestRayOBBIntersection(ray_origin, ray_direction, aabb_min, aabb_max, ma));
+                if (TestRayOBBIntersection(ray_origin, ray_direction, aabb_min, aabb_max, ma))
+                    enemy.hit()
+            });
+        });
+        this.rightBuildings.forEach(left => {
+            left.enemies.forEach(enemy => {
+                var aabb_min = enemy.model.boundings[1];
+                var aabb_max = enemy.model.boundings[0];
+                var ma = glMatrix.mat4.clone(enemy.transformation);
+                
+        
+           
+                if (TestRayOBBIntersection(ray_origin, ray_direction, aabb_min, aabb_max, ma))
+                    enemy.hit()
             });
         });
     }
 
     initBuildings()
     {
-        for(var i = 0; i < 1; i++)
+        for(var i = 0; i < 10; i++)
         {
             this.rightBuildings.push(this.createNewBuilding(true));
-            
+            this.leftBuildings.push(this.createNewBuilding(false));
         
         }
 
@@ -133,7 +146,7 @@ class Player
         this.horseModel.callAnimator();
         this.ownModel.drawModel(glMatrix.mat4.clone(this.transformation));
         this.horseModel.drawModel(glMatrix.mat4.clone(this.transformation));
-      //  this.moveYourAss();
+        this.moveYourAss();
     }
 
     moveYourAss()
@@ -230,14 +243,17 @@ class Enemy
         this.targetransformation = target;
         this.v3tranlate = glMatrix.vec3.create();
         glMatrix.mat4.getTranslation(this.v3tranlate, trans);
-
+        this.alive = true
         this.model.addBoundingBox("EnemyBoundingBoxVertex");
         
       
 
 
     }
-
+    hit()
+    {
+        this.alive=false
+    }
     getAngleY()
     {
         var v31 = glMatrix.vec2.fromValues(this.v3tranlate[0], this.v3tranlate[2]);
@@ -263,7 +279,8 @@ class Enemy
 
     render()
     {   
-
+        if(this.alive == false)
+            return;
         this.model.animator.addExtraRotation("Enemy1", [this.getAngleX(),this.getAngleY(),0]);
         this.model.callAnimator();
         this.model.drawModel(glMatrix.mat4.clone(this.transformation));
