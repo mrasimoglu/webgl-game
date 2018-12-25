@@ -167,12 +167,20 @@ class Game
 
     checkCollision(pos, min, max)
     {
-        if(pos > min - 2.5 && pos < max + 2.5)
-            console.log("dıtdıt");
-        else if(pos < min + 2.5 && pos > max - 2.5)
-            console.log("dıtdıt");
+        if(min < max)
+        {
+            if(pos > min - 2.5 && pos < max + 2.5)
+                console.log("dıtdıt");
+            else
+                console.log("gec");
+        }
         else
-            console.log("gec");
+        {
+            if(pos < min + 2.5 && pos > max - 2.5)
+                console.log("dıtdıt");
+            else
+                console.log("gec");
+        }
     }
 }
 
