@@ -348,11 +348,13 @@ class Enemy
     hit()
     {
         this.health -= 50;
+        if(this.health < 0)
+            this.health = 0;
         if(this.health <= 0 && this.alive==true)
         {
-            this.alive = false;
             this.model.animator.playAnimation(0, false);
-         
+            this.alive = false;
+      
         }
     }
     getAngleY()
