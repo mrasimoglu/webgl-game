@@ -34,6 +34,8 @@ class Game
 
     checkClicks(ray_origin, ray_direction)
     {
+        if(this.player.alive == false)
+            return;
         this.leftBuildings.forEach(left => {
             left.enemies.forEach(enemy => {
                 var aabb_min = enemy.model.boundings[1];
@@ -170,6 +172,8 @@ class Game
         this.rightBuildings.forEach(right => {
             right.update(VP);
         });
+
+        
     }
 
     checkCollision(pos, min, max)
@@ -177,16 +181,14 @@ class Game
         if(min < max)
         {
             if(pos > min - 2.5 && pos < max + 2.5)
-                console.log("dıtdıt");
-            else
-                console.log("gec");
+                this.player.hit();
+
         }
         else
         {
             if(pos < min + 2.5 && pos > max - 2.5)
-                console.log("dıtdıt");
-            else
-                console.log("gec");
+                this.player.hit();
+
         }
     }
 }
@@ -201,16 +203,34 @@ class Player
         this.horseModel = model[1];
 
         this.ownModel.animator.playAnimation(0);
-        this.horseModel.animator.playAnimation(2);
+        this.horseModel.animator.playAnimation(3);
+        this.health = 100;
+        this.alive = true;
     }
 
     render()
     {
+        drawHealthBar(this.health, [0,-0.2,0.98]);
         this.ownModel.callAnimator();
         this.horseModel.callAnimator();
         this.ownModel.drawModel(glMatrix.mat4.clone(this.transformation));
         this.horseModel.drawModel(glMatrix.mat4.clone(this.transformation));
-        this.moveYourAss();
+        if(this.alive)
+            this.moveYourAss();
+    }
+
+    hit()
+    {
+        this.health -= 10;
+        if(this.health < 0)
+            this.health = 0;
+        if(this.health <= 0 && this.alive==true)
+        {
+            this.horseModel.animator.playAnimation(2, false);
+            this.ownModel.animator.playAnimation(2, false);
+            this.alive = false;
+      
+        }
     }
 
     moveYourAss()
@@ -224,12 +244,12 @@ class Player
             if(pos[2] < 20)
                 glMatrix.mat4.translate(this.transformation, this.transformation, [0,0,0.025*DeltaTime]);
             else
-                this.horseModel.animator.playAnimation(2);
+                this.goForward();
         else if(this.horseModel.animator.currentAnimation.name.includes("Left"))
             if(pos[2] > -20)
                 glMatrix.mat4.translate(this.transformation, this.transformation, [0,0,-0.025*DeltaTime]);
             else
-                this.horseModel.animator.playAnimation(2);
+                this.goForward();
     }
 
     goRight()
@@ -244,7 +264,7 @@ class Player
     
     goForward()
     {
-        this.horseModel.animator.playAnimation(2);
+        this.horseModel.animator.playAnimation(3);
     }
 }
 
