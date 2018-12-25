@@ -235,6 +235,9 @@ class Player
 
     moveYourAss()
     {
+        if(this.alive == false)
+            return;
+
         glMatrix.mat4.translate(this.transformation, this.transformation, [0.1*DeltaTime,0,0]);
 
         var pos = glMatrix.vec3.create();
@@ -254,17 +257,35 @@ class Player
 
     goRight()
     {
-        this.horseModel.animator.playAnimation(1);
+        if(this.alive == false)
+            return;
+
+        var pos = glMatrix.vec3.create();
+        glMatrix.mat4.getTranslation(pos, this.transformation);
+
+        if(pos[2] < 20 && !this.horseModel.animator.currentAnimation.name.includes("Right"))
+            this.horseModel.animator.playAnimation(1);
     }
 
     goLeft()
     {
-        this.horseModel.animator.playAnimation(0);
+        if(this.alive == false)
+            return;
+
+        var pos = glMatrix.vec3.create();
+        glMatrix.mat4.getTranslation(pos, this.transformation);
+
+        if(pos[2] > -20 && !this.horseModel.animator.currentAnimation.name.includes("Left"))
+            this.horseModel.animator.playAnimation(0);
     }
     
     goForward()
     {
-        this.horseModel.animator.playAnimation(3);
+        if(this.alive == false)
+            return;
+            
+        if(!this.horseModel.animator.currentAnimation.name.includes("Run"))
+            this.horseModel.animator.playAnimation(3);
     }
 }
 
