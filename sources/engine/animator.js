@@ -6,8 +6,8 @@ class Animator {
         this.animationStartTime = 0;
         this.animations = animations;
         this.Model = model;
-
-
+        this.loop = true;
+        this.finished = true;
         this.extraRotations = {};
     }
 
@@ -17,8 +17,15 @@ class Animator {
         this.extraRotations[bonename] = angles;
     }
 
-    playAnimation(id)
+    clearExtraRotations()
     {
+        this.extraRotations = [];
+    }
+
+    playAnimation(id, loop=true)
+    {   
+        this.finished=false;
+        this.loop = loop;
         if(this.animations[id] == undefined)
             return false;
         this.currentAnimation = this.animations[id];
@@ -29,6 +36,15 @@ class Animator {
 
     getAnimationTime()
     {
+        if(this.loop != true)
+        {
+            if((Date.now() - this.animationStartTime) / (1000 / this.currentAnimation.tickspersecond) > this.currentAnimation.duration)
+            {
+                this.finished = true;
+                return this.currentAnimation.duration - 1;
+            }
+                
+        }
         return ((Date.now() - this.animationStartTime) / (1000 / this.currentAnimation.tickspersecond)) % this.currentAnimation.duration;
     }
 

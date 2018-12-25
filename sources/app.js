@@ -3,6 +3,8 @@ var kx = -60, ky = 2, kz = -300;//light position
 var s = 1;
 var isPlay = false;
 var DeltaTime = 0;
+var hud;
+var canvashud;
 var Init = async function() 
 {
     var canvas = document.getElementById("mycanvas");
@@ -63,7 +65,8 @@ var Init = async function()
 }
 
 function Run(gl, buildingJSONs, enemiesJSONs,playerJSON, generalJSONs, GeneralShader, SkyboxShader, aspectratio, barrierJSONs){
-    var canvashud = document.getElementById("hud");
+    canvashud = document.getElementById("hud");
+    hud = canvashud.getContext("2d");
 
   
     var buildingModels = [];
@@ -105,8 +108,11 @@ function Run(gl, buildingJSONs, enemiesJSONs,playerJSON, generalJSONs, GeneralSh
     var RayEnd_world = glMatrix.vec4.create();
     var RayDir_world = glMatrix.vec3.create();
     var game = new Game(buildingModels, enemyModels, generalModels, playerModels, barrierModels);
-  
+    var VP = glMatrix.mat4.create();
     const loop = () => {
+        hud.clearRect(0, 0, canvashud.width, canvashud.height);
+        
+
         gl.useProgram(GeneralShader.program);
         gl.clearColor(0.4, 0.4, 0.4, 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -161,7 +167,8 @@ function Run(gl, buildingJSONs, enemiesJSONs,playerJSON, generalJSONs, GeneralSh
             leftPressed = false;
         }
 
-        game.update();
+        glMatrix.mat4.mul(VP, projectionMatrix.elements, viewMatrix);
+        game.update(glMatrix.mat4.clone(VP));
         game.render();
 
         gl.depthFunc(gl.LEQUAL);
@@ -171,9 +178,15 @@ function Run(gl, buildingJSONs, enemiesJSONs,playerJSON, generalJSONs, GeneralSh
         DeltaTime = now - before;
         before = now;
 
+       
         requestAnimationFrame(loop);
     }
     loop();
+
+
+
+
+
 
     document.onkeypress = (event) => {
         if(event.key == "A" || event.key == "a")
@@ -226,7 +239,25 @@ function Run(gl, buildingJSONs, enemiesJSONs,playerJSON, generalJSONs, GeneralSh
         Lz -= Lz/rate;
     };
 }
+function drawHealthBar(health, point3D)
+{
+    var winX = Math.round((( point3D[0] + 1 ) / 2.0) *
+    canvashud.width );
+    var winY = Math.round((( 1 - point3D[1] ) / 2.0) *
+    canvashud.height );
+    
 
+    far = (point3D[2] * 100) - parseInt(point3D[2] * 100)
+    far *= 10;
+    if(far < 1)
+        far = 1;
+    var wx = 100 / far;
+    hud.fillStyle = "#FF0000";
+    hud.fillRect(winX - wx/2, winY, wx ,20 / far);
+    hud.fillStyle = "#00FF00";
+    hud.fillRect(winX - wx/2, winY, health / far ,20 / far);
+    
+}
 function TestRayOBBIntersection(ray_origin, ray_direction, aabb_min, aabb_max, ModelMatrix)
 {
     var tMin = 0;
@@ -339,6 +370,7 @@ function TestRayOBBIntersection(ray_origin, ray_direction, aabb_min, aabb_max, M
     return true;
 
 }
+
 
 var clicked = false;
 var rightPressed = false;

@@ -144,7 +144,7 @@ class Game
         this.player.render();
     }
 
-    update()
+    update(VP)
     {
         var tmp = glMatrix.vec3.create();
         glMatrix.mat4.getTranslation(tmp, this.player.transformation);
@@ -163,6 +163,13 @@ class Game
 
             this.checkCollision(pos[2], v3[2], v4[2]);
         }
+
+        this.leftBuildings.forEach(left => {
+            left.update(VP);
+        });
+        this.rightBuildings.forEach(right => {
+            right.update(VP);
+        });
     }
 
     checkCollision(pos, min, max)
@@ -304,7 +311,12 @@ class Building
         });
      
     }
-
+    update(VP)
+    {
+        this.enemies.forEach(enemy => {
+            enemy.update(VP);
+        });
+    }
     render()
     {
         this.enemies.forEach((enemy,id) => {
@@ -329,10 +341,19 @@ class Enemy
         glMatrix.mat4.getTranslation(this.v3tranlate, trans);
         this.alive = true
         this.model.addBoundingBox("EnemyBoundingBoxVertex");
+        this.health = 100;
+        this.model.animator.playAnimation(2, true);
+        this.alive=true;
     }
     hit()
     {
-        this.alive=false
+        this.health -= 50;
+        if(this.health <= 0 && this.alive==true)
+        {
+            this.alive = false;
+            this.model.animator.playAnimation(0, false);
+         
+        }
     }
     getAngleY()
     {
@@ -354,14 +375,29 @@ class Enemy
             return -Math.atan(v31[0]/v31[1]);
         else
             return Math.atan(v31[0]/v31[1]);
+    }
 
+    update(VP)
+    {
+        var ma = glMatrix.mat4.create();
+        var v3 = glMatrix.vec4.create();
+        glMatrix.mat4.getTranslation(v3, this.transformation);
+        
+        glMatrix.vec3.transformMat4(ma, v3, VP);
+        glMatrix.mat4.getTranslation(v3, ma);
+        
+        drawHealthBar(this.health,[ma[0], ma[1], ma[2]]);
     }
 
     render()
     {   
-        if(this.alive == false)
-            return;
-        this.model.animator.addExtraRotation("Enemy1", [this.getAngleX(),this.getAngleY(),0]);
+        
+        if(this.alive==true)
+        {
+            this.model.animator.addExtraRotation("Enemy1", [this.getAngleX(),this.getAngleY(),0]);
+        }
+  
+        
         this.model.callAnimator();
         this.model.drawModel(glMatrix.mat4.clone(this.transformation));
     }
