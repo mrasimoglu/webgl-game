@@ -37,18 +37,14 @@ class Animator {
         var NodeTransformation = glMatrix.mat4.clone(root.transformation);
        
         var currentAnimChannel = this.currentAnimation.channels.getChannelbyName(root.name);
-        var currentAnimChannel = this.currentAnimation.channels.getChannelbyName(root.name);
+
 
         if(currentAnimChannel != undefined)
         {
-            
             var RotationMatrix = glMatrix.mat4.create();
             var rquat = this.CalcInterpolatedRotation(currentAnimChannel.getRKey(ATime),currentAnimChannel.rotationkeys, ATime);
             glMatrix.mat4.fromQuat(RotationMatrix, rquat);
 
-          
-                
-            
             var TransformationMatrix = glMatrix.mat4.create();
             var tv3 = this.CalcInterpolatedLocation(currentAnimChannel.getPKey(ATime),currentAnimChannel.positionkeys, ATime);
             glMatrix.mat4.fromTranslation(TransformationMatrix, tv3);
@@ -64,18 +60,18 @@ class Animator {
                 glMatrix.quat.rotateY(rrquat, rrquat,(this.extraRotations[root.name][1]));
                 glMatrix.quat.rotateZ(rrquat, rrquat,(this.extraRotations[root.name][2]));
 
-                
                 glMatrix.mat4.fromQuat(RotationMatrix, rrquat);
             }
 
             glMatrix.mat4.mul(NodeTransformation, TransformationMatrix, RotationMatrix);
             glMatrix.mat4.mul(NodeTransformation, NodeTransformation, ScalingMatrix);
-           
         }
 
         var GlobalTransformation = glMatrix.mat4.create();
-        glMatrix.mat4.mul(GlobalTransformation,ParentTransform,NodeTransformation);
-       
+        if(currentAnimChannel != undefined)
+            glMatrix.mat4.mul(GlobalTransformation,ParentTransform, NodeTransformation);
+        else
+            glMatrix.mat4.mul(GlobalTransformation,NodeTransformation, ParentTransform);
         var bones = this.Model.getBoneByName(root.name);
         
         if(bones.length > 0)
@@ -89,20 +85,10 @@ class Animator {
         }
        
             root.mesh.forEach(m => {
-                // console.log(root.name  + "animat");
-                 var mmm  = glMatrix.mat4.create();
-                 glMatrix.mat4.transpose(mmm, GlobalTransformation);
-                 this.Model.meshes[m].transformation.push(glMatrix.mat4.clone(mmm));
-               //  console.log(GlobalTransformation);
+                var mesh = this.Model.meshes[m];
+                mesh.transformation.push(glMatrix.mat4.clone(GlobalTransformation));
              });
-        
-        
-        
 
-        
-        
-       
-   
         root.childs.forEach((child) => {
             this.loopinside(child, glMatrix.mat4.clone(GlobalTransformation),m_GlobalInverseTransform, ATime);
         });  
@@ -187,4 +173,3 @@ class AnimationGL {
         return;
     }
 }
-

@@ -65,7 +65,9 @@ class Model {
         if(root.name.startsWith(target))
         {
             var tmp = glMatrix.vec3.create();
-            glMatrix.mat4.getTranslation(tmp, parent);
+            var ma = glMatrix.mat4.clone(parent);
+            glMatrix.mat4.transpose(ma, ma);
+            glMatrix.mat4.getTranslation(tmp, ma);
             this.boundings.push(tmp);
         }
         root.childs.forEach((child) => {
@@ -76,6 +78,7 @@ class Model {
 
     loopinside(root, globaltranformation)
     {
+        
         glMatrix.mat4.mul(globaltranformation,  root.transformation,globaltranformation);
         if (root.meshes == undefined)
             var tmp = new Joint(root.name, root.transformation);
@@ -86,6 +89,7 @@ class Model {
                 var ma = glMatrix.mat4.clone(globaltranformation);
             
                 this.meshes[mesh].transformation.push(glMatrix.mat4.clone(ma));
+
             });
 
             var bones= this.getBoneByName(root.name);
@@ -107,57 +111,38 @@ class Model {
 
     drawModel(ModelMatrix)
     {
-         glMatrix.mat4.transpose(ModelMatrix, ModelMatrix);
-       // this.drawModell(this.root, glMatrix.mat4.clone(ModelMatrix));
-        // console.log("--");
+        glMatrix.mat4.transpose(ModelMatrix, ModelMatrix);
         this.meshes.forEach((mesh)=>{
-           mesh.transformation.forEach((trans) => {
-            var ma = glMatrix.mat4.create();
+            mesh.transformation.forEach((trans) => {
+                var ma = glMatrix.mat4.create();
 
-           // glMatrix.mat4.mul(ma, ma, trans);
-            if(mesh.bones.getLength() <= 0)
-            {
-                glMatrix.mat4.mul(ma, trans, ModelMatrix);
+                if(mesh.bones.getLength() <= 0)
+                {
+                    glMatrix.mat4.mul(ma, trans, ModelMatrix);   
+                }
+                else
+                {
+                    glMatrix.mat4.mul(ma, ma, ModelMatrix);
+                }
                 
-         
-               
-            }
-            else
-            {
+                glMatrix.mat4.transpose(ma, ma);
             
-                glMatrix.mat4.mul(ma, ma, ModelMatrix);
-            }
-           
-            glMatrix.mat4.transpose(ma, ma);
-            if(mesh.name=="Cube.005")
-            {
-                //glMatrix.mat4.transpose(ma, ma);
-                var v3 = glMatrix.vec3.create();
-                glMatrix.mat4.getTranslation(v3, ma);
-                console.log(v3);
-                  
-            }
-            mesh.drawMesh(this.Shader, glMatrix.mat4.clone(ma));
-           });
-           
+                mesh.drawMesh(this.Shader, glMatrix.mat4.clone(ma));
+            });
         });
     }
 
     drawModell(root,parenttrans)
     {
         var ma2 = glMatrix.mat4.create();
-   //    glMatrix.mat4.transpose(ma2, root.transformation);
 
-   glMatrix.mat4.mul(parenttrans,root.transformation,parenttrans);
+        glMatrix.mat4.mul(parenttrans,root.transformation,parenttrans);
       
-       
         root.mesh.forEach((mesh)=>{
             var ma = glMatrix.mat4.clone(parenttrans);
-          //  glMatrix.mat4.invert(ma, parenttrans);
             glMatrix.mat4.transpose(ma, parenttrans);
             this.meshes[mesh].drawMesh(this.Shader, glMatrix.mat4.clone(ma));
         });
-
 
         root.childs.forEach((child)=>{
             this.drawModell(child, glMatrix.mat4.clone(parenttrans));
@@ -220,8 +205,3 @@ class Model {
         return bones;
     }
 }
-
-
-
-
-

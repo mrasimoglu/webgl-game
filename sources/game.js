@@ -1,12 +1,18 @@
 class Game
 {
-    constructor(buildingModels, enemyModels, environmentModels, playerModel)
+    constructor(buildingModels, enemyModels, environmentModels, playerModel, barrierModels)
     {
         this.player = new Player(playerModel);
 
         this.camera = new Camera(glMatrix.vec3.fromValues(-120, 40 ,0), this.player.transformation);
 
         this.enemyModels = enemyModels;
+
+        this.barrierModels = barrierModels;
+        console.log(this.   barrierModels);
+        this.barrierModels.forEach(m => {
+            m.addBoundingBox("CollidingBoxVertex");
+        });
    
         this.environmentModels = environmentModels;
 
@@ -18,30 +24,58 @@ class Game
         this.leftBuildings = [];
         this.rightBuildings = [];
 
+        this.barrierLocs = [];
+
         this.leftcount = 0;
         this.rightcount = 0;
-
-        this.initEnvironment();
 
         this.initBuildings(this.buildings, this.enemies);
     }
 
-    initEnvironment()
+    checkClicks(ray_origin, ray_direction)
     {
+        this.leftBuildings.forEach(left => {
+            left.enemies.forEach(enemy => {
+                var aabb_min = enemy.model.boundings[1];
+                var aabb_max = enemy.model.boundings[0];
+                var ma = glMatrix.mat4.clone(enemy.transformation);
+                
         
+                if (TestRayOBBIntersection(ray_origin, ray_direction, aabb_min, aabb_max, ma))
+                    enemy.hit()
+            });
+        });
+        this.rightBuildings.forEach(right => {
+            right.enemies.forEach(enemy => {
+                var aabb_min = enemy.model.boundings[1];
+                var aabb_max = enemy.model.boundings[0];
+                var ma = glMatrix.mat4.clone(enemy.transformation);
+
+                if (TestRayOBBIntersection(ray_origin, ray_direction, aabb_min, aabb_max, ma))
+                    enemy.hit()
+            });
+        });
     }
 
     initBuildings()
     {
-        for(var i = 0; i < 1; i++)
+        for(var i = 0; i < 10; i++)
         {
             this.rightBuildings.push(this.createNewBuilding(true));
-            
-           // this.leftBuildings.push(this.createNewBuilding(false));
+            this.leftBuildings.push(this.createNewBuilding(false));
         }
 
-        this.leftBuildings.forEach((b) => {
-        });
+        for(var i = 0; i < 10; i++)
+        {
+            var rnd = Math.floor(Math.random() * 100) % 3;
+            var rnd2 = Math.floor(Math.random() * 100) % this.barrierModels.length; 
+            if(rnd == 0)
+                this.barrierLocs.push([0, 0, -20], rnd2);
+            else if(rnd == 1)
+                this.barrierLocs.push([0, 0, 20], rnd2);
+            else
+                this.barrierLocs.push([0, 0, 0], rnd2);
+        }
     }
 
     createNewBuilding(lr)
@@ -68,22 +102,40 @@ class Game
     {
         this.rightBuildings.shift();
         this.leftBuildings.shift();
+        
+        this.barrierLocs.shift();
+        this.barrierLocs.shift();
 
         this.rightBuildings.push(this.createNewBuilding(true));
         this.leftBuildings.push(this.createNewBuilding(false));
+
+        var rnd = Math.floor(Math.random() * 100) % 3;
+        var rnd2 = Math.floor(Math.random() * 100) % this.barrierModels.length; 
+        if(rnd == 0)
+            this.barrierLocs.push([0, 0, -20], rnd2);
+        else if(rnd == 1)
+            this.barrierLocs.push([0, 0, 20], rnd2);
+        else
+            this.barrierLocs.push([0, 0, 0], rnd2);
     }
 
     render()
     {
-
+        var counter = 0;
         this.rightBuildings.forEach((b) => {
             b.render();
+
             var tmp = glMatrix.vec3.create();
-            glMatrix.mat4.getTranslation(tmp, b.transformation);
             var ma = glMatrix.mat4.create();
+            glMatrix.mat4.getTranslation(tmp, b.transformation);
             glMatrix.mat4.fromTranslation(ma,[tmp[0] - 150, 0, 0]);
-            this.environmentModels.terrain.drawModel(ma);
-            
+
+            this.environmentModels.terrain.drawModel(glMatrix.mat4.clone(ma));
+
+            glMatrix.mat4.translate(ma, ma, this.barrierLocs[counter]);
+            this.barrierModels[this.barrierLocs[counter + 1]].drawModel(ma);
+
+            counter = counter + 2;
         });
         this.leftBuildings.forEach((b) => {
             b.render();
@@ -99,7 +151,28 @@ class Game
         if((tmp[0] / 150) > ( this.leftcount - 9))
         {
             this.updateBuildings();
+
+            var pos = glMatrix.vec3.create();
+            glMatrix.mat4.getTranslation(pos, this.player.transformation);
+
+            var v3 = glMatrix.vec3.clone(this.barrierModels[this.barrierLocs[1]].boundings[0]);
+            var v4 = glMatrix.vec3.clone(this.barrierModels[this.barrierLocs[1]].boundings[1]);
+
+            glMatrix.vec3.add(v3, v3, this.barrierLocs[0]);
+            glMatrix.vec3.add(v4, v4, this.barrierLocs[0]);
+
+            this.checkCollision(pos[2], v3[2], v4[2]);
         }
+    }
+
+    checkCollision(pos, min, max)
+    {
+        if(pos > min - 2.5 && pos < max + 2.5)
+            console.log("dıtdıt");
+        else if(pos < min + 2.5 && pos > max - 2.5)
+            console.log("dıtdıt");
+        else
+            console.log("gec");
     }
 }
 
@@ -113,7 +186,7 @@ class Player
         this.horseModel = model[1];
 
         this.ownModel.animator.playAnimation(0);
-        this.horseModel.animator.playAnimation(0);
+        this.horseModel.animator.playAnimation(2);
     }
 
     render()
@@ -122,12 +195,41 @@ class Player
         this.horseModel.callAnimator();
         this.ownModel.drawModel(glMatrix.mat4.clone(this.transformation));
         this.horseModel.drawModel(glMatrix.mat4.clone(this.transformation));
-      //  this.moveYourAss();
+        this.moveYourAss();
     }
 
     moveYourAss()
     {
         glMatrix.mat4.translate(this.transformation, this.transformation, [0.1*DeltaTime,0,0]);
+
+        var pos = glMatrix.vec3.create();
+        glMatrix.mat4.getTranslation(pos, this.transformation);
+
+        if(this.horseModel.animator.currentAnimation.name.includes("Right"))
+            if(pos[2] < 20)
+                glMatrix.mat4.translate(this.transformation, this.transformation, [0,0,0.025*DeltaTime]);
+            else
+                this.horseModel.animator.playAnimation(2);
+        else if(this.horseModel.animator.currentAnimation.name.includes("Left"))
+            if(pos[2] > -20)
+                glMatrix.mat4.translate(this.transformation, this.transformation, [0,0,-0.025*DeltaTime]);
+            else
+                this.horseModel.animator.playAnimation(2);
+    }
+
+    goRight()
+    {
+        this.horseModel.animator.playAnimation(1);
+    }
+
+    goLeft()
+    {
+        this.horseModel.animator.playAnimation(0);
+    }
+    
+    goForward()
+    {
+        this.horseModel.animator.playAnimation(2);
     }
 }
 
@@ -163,19 +265,17 @@ class Building
 
     initEnemies(EnemyModels, targetransformation)
     {
-
         this.enemiesTransformations.forEach((trans)=>{
-        if(Math.random() > 0.3) // zorluk seviyesi
-        {
-            var enemy = EnemyModels[(Math.floor(Math.random() * EnemyModels.length))].copy();
-            var Trans = glMatrix.mat4.create();
-    
-            glMatrix.mat4.mul(Trans, this.transformation,trans);
-            glMatrix.mat4.scale(Trans, Trans, [0.01, 0.01, 0.01]);
-            glMatrix.mat4.rotateX(Trans, Trans, glMatrix.glMatrix.toRadian(90));
-            this.enemies.push(new Enemy(enemy, glMatrix.mat4.clone(Trans), targetransformation));
-        }
-                
+            if(Math.random() > 0.3) // zorluk seviyesi
+            {
+                var enemy = EnemyModels[(Math.floor(Math.random() * EnemyModels.length))].copy();
+                var Trans = glMatrix.mat4.create();
+        
+                glMatrix.mat4.mul(Trans, this.transformation,trans);
+                glMatrix.mat4.scale(Trans, Trans, [0.01, 0.01, 0.01]);
+                glMatrix.mat4.rotateX(Trans, Trans, glMatrix.glMatrix.toRadian(90));
+                this.enemies.push(new Enemy(enemy, glMatrix.mat4.clone(Trans), targetransformation));
+            }
         });
 
     }
@@ -219,14 +319,13 @@ class Enemy
         this.targetransformation = target;
         this.v3tranlate = glMatrix.vec3.create();
         glMatrix.mat4.getTranslation(this.v3tranlate, trans);
-
+        this.alive = true
         this.model.addBoundingBox("EnemyBoundingBoxVertex");
-        
-      
-
-
     }
-
+    hit()
+    {
+        this.alive=false
+    }
     getAngleY()
     {
         var v31 = glMatrix.vec2.fromValues(this.v3tranlate[0], this.v3tranlate[2]);
@@ -252,7 +351,8 @@ class Enemy
 
     render()
     {   
-
+        if(this.alive == false)
+            return;
         this.model.animator.addExtraRotation("Enemy1", [this.getAngleX(),this.getAngleY(),0]);
         this.model.callAnimator();
         this.model.drawModel(glMatrix.mat4.clone(this.transformation));
