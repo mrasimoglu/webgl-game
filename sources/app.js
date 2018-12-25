@@ -246,18 +246,20 @@ function drawHealthBar(health, point3D)
     var winY = Math.round((( 1 - point3D[1] ) / 2.0) *
     canvashud.height );
     
-
-    far = (point3D[2] * 100) - parseInt(point3D[2] * 100)
-    far *= 10;
-    if(far < 1)
-        far = 1;
-    var wx = 100 / far;
+    
+    far = (-point3D[2]);
+    far = normalizee(far, 1, -1);
+    far *= 100;
+    
+    
+    var wx = 100 * far;
     hud.fillStyle = "#FF0000";
-    hud.fillRect(winX - wx/2, winY, wx ,20 / far);
+    hud.fillRect(winX - wx/2, winY, wx ,20 * far);
     hud.fillStyle = "#00FF00";
-    hud.fillRect(winX - wx/2, winY, health / far ,20 / far);
+    hud.fillRect(winX - wx/2, winY, health * far ,20 * far);
     
 }
+function normalizee(val, max, min) { return (val - min) / (max - min); }
 function TestRayOBBIntersection(ray_origin, ray_direction, aabb_min, aabb_max, ModelMatrix)
 {
     var tMin = 0;
